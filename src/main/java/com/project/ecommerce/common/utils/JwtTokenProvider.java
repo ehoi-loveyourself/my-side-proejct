@@ -98,9 +98,9 @@ public class JwtTokenProvider {
             // 4. Spring Security 의 Authentication 객체 반환
             return new UsernamePasswordAuthenticationToken(principal, token, authorities);
         } catch (ExpiredJwtException e) {
-            throw new JwtException(JwtErrorMessages.EXPIRED_TOKEN, e);
+            throw new JwtException(JwtErrorMessages.EXPIRED_TOKEN);
         } catch (MalformedJwtException | IllegalArgumentException e) {
-            throw new JwtException(JwtErrorMessages.INVALID_TOKEN, e);
+            throw new JwtException(JwtErrorMessages.INVALID_TOKEN);
         }
     }
 
