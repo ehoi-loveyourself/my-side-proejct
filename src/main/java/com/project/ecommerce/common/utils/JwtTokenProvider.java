@@ -110,12 +110,13 @@ public class JwtTokenProvider {
      * 토큰 유효성 검증
      * @param token
      */
-    public void validateToken(String token) {
+    public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key) // 서명을 검증할 key 설정
                     .build()
                     .parseClaimsJws(token);
+            return true;
         } catch (SecurityException | MalformedJwtException e) {
             throw new JwtException(JwtErrorMessages.INVALID_TOKEN);
         } catch (ExpiredJwtException e) {
