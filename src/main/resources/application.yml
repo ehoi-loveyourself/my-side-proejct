@@ -19,7 +19,7 @@ spring:
       path: /h2-console
 
 jwt:
-  secret: VGhpcy1pcy1hLXZlcnktc2VjcmV0LXNlY3JldC1rZXktd2hpY2gtaXMtbG9uZy1lbm91Z2gtZm9yLUhTNTEy # ??? ? secret key ????
+  secret: D0BUrCTCH2C0ima4cy7k5hPATiO90GU8dDw8mBj6LfAu07+BVkueaknyKqfQ6m+wKqCfVfNxaAnK2sJAhZlV4w==
   token-validity-in-seconds: 60 * 30
 
 server:
