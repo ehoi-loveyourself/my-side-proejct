@@ -1,5 +1,6 @@
 package com.project.ecommerce.domain.user.dto;
 
+import com.project.ecommerce.common.exception.UserErrorMessages;
 import com.project.ecommerce.domain.user.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -22,7 +23,7 @@ public class UserDto {
         private String email;
 
         @NotBlank(message = "비밀번호는 필수입니다")
-        @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다")
+        @Size(min = 8, message = UserErrorMessages.MIN_PASSWORD_LENGTH_ERROR)
         private String password;
 
         @NotBlank(message = "이름은 필수입니다")
@@ -87,7 +88,7 @@ public class UserDto {
         private String currentPassword;
 
         @NotBlank(message = "변경할 비밀번호는 필수입니다")
-        @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다")
+        @Size(min = 8, message = UserErrorMessages.MIN_PASSWORD_LENGTH_ERROR)
         private String newPassword;
     }
 }
