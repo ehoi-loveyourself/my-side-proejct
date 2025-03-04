@@ -93,10 +93,10 @@ public class UserServiceImpl implements UserService {
             user.updateName(request.getName());
         }
 
-        // 업데이트된 사용자 저장
-        User updatedUser = userRepository.save(user);
+        // 업데이트된 사용자 저장 -> JPA의 변경 감지(더티 체킹) 기능 덕분에 save() 호출 필요 없음!
+//        User updatedUser = userRepository.save(user);
 
-        return UserDto.UserResponse.of(updatedUser);
+        return UserDto.UserResponse.of(user);
     }
 
     private boolean isValidName(String name) {
