@@ -111,8 +111,22 @@ public class UserServiceImpl implements UserService {
             throw new UserException(UserErrorMessages.INCORRECT_PASSWORD, HttpStatus.BAD_REQUEST);
         }
 
+        // 바꾸려는 비밀번호가 현재 비밀번호와 같은지도 체크
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new UserException(UserErrorMessages.SAME_WITH_BEFORE_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
+
+        // 비밀번호 유효성 검사
+        validatePassword(request.getNewPassword());
+
         // 새 비밀번호로 업데이트
         user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
+    }
+
+    private void validatePassword(String password) {
+        if (password.length() < 8) {
+            throw new UserException(UserErrorMessages.MIN_PASSWORD_LENGTH_ERROR, HttpStatus.BAD_REQUEST);
+        }
     }
 
     private boolean isValidName(String name) {
