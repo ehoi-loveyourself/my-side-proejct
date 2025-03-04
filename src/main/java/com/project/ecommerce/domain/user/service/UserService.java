@@ -13,6 +13,7 @@ public interface UserService {
     UserDto.UserResponse currentUser(String email);
 
     // 회원 정보 수정
+    UserDto.UserResponse updateUser(String email, UserDto.UpdateRequest request);
 
     // 비밀번호 수정
 }

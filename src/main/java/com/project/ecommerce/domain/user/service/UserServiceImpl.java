@@ -79,4 +79,27 @@ public class UserServiceImpl implements UserService {
 
         return UserDto.UserResponse.of(user);
     }
+
+    @Override
+    @Transactional
+    public UserDto.UserResponse updateUser(String email, UserDto.UpdateRequest request) {
+        // 이메일로 회원을 찾음
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
+
+        // 수정해야 할 필드에 대해 유효성 검사
+        if (isValidName(request.getName())) {
+            // 이름 변경
+            user.updateName(request.getName());
+        }
+
+        // 업데이트된 사용자 저장
+        User updatedUser = userRepository.save(user);
+
+        return UserDto.UserResponse.of(updatedUser);
+    }
+
+    private boolean isValidName(String name) {
+        return name != null && !name.trim().isEmpty();
+    }
 }

@@ -68,4 +68,13 @@ public class UserDto {
         private String token;
 //        private UserResponse user; // todo: user 정보는 별도 api 로 분리하는 것 고려
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdateRequest {
+
+        @NotBlank(message = "이름은 공백일 수 없습니다.")
+        private String name;
+    }
 }
