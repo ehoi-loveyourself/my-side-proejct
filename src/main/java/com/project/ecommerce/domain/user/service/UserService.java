@@ -7,6 +7,7 @@ public interface UserService {
     UserDto.UserResponse signUp(UserDto.SignUpRequest request);
 
     // 로그인
+    UserDto.TokenResponse login(UserDto.LoginRequest request);
 
     // 회원 정보 조회
 
