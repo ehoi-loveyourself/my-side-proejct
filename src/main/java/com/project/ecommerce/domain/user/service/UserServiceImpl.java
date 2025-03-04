@@ -72,5 +72,11 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    @Override
+    public UserDto.UserResponse currentUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
 
+        return UserDto.UserResponse.of(user);
+    }
 }
