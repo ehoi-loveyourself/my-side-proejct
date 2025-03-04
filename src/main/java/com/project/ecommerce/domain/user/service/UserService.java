@@ -16,4 +16,5 @@ public interface UserService {
     UserDto.UserResponse updateUser(String email, UserDto.UpdateRequest request);
 
     // 비밀번호 수정
+    void updatePassword(String email, UserDto.UpdatePasswordRequest request);
 }

@@ -99,6 +99,22 @@ public class UserServiceImpl implements UserService {
         return UserDto.UserResponse.of(user);
     }
 
+    @Override
+    @Transactional
+    public void updatePassword(String email, UserDto.UpdatePasswordRequest request) {
+        // 이메일로 회원을 찾음
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
+
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new UserException(UserErrorMessages.INCORRECT_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
+
+        // 새 비밀번호로 업데이트
+        user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
+    }
+
     private boolean isValidName(String name) {
         return name != null && !name.trim().isEmpty();
     }
