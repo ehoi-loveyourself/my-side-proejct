@@ -15,10 +15,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ErrorResponse> handleUserException(RuntimeException e) {
-        ErrorResponse response = ErrorResponse.builder()
-                .status("error")
-                .error(new ErrorDetails(e.getMessage()))
-                .build();
+        ErrorResponse response = new ErrorResponse("error", new ErrorDetails(e.getMessage()));
+
+//        ErrorResponse response = ErrorResponse.builder()
+//                .status("error")
+//                .error(new ErrorDetails(e.getMessage()))
+//                .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(response);
@@ -26,10 +28,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<ErrorResponse> handleJwtException(RuntimeException e) {
-        ErrorResponse response = ErrorResponse.builder()
-                .status("error")
-                .error(new ErrorDetails(e.getMessage()))
-                .build();
+        ErrorResponse response = new ErrorResponse("error", new ErrorDetails(e.getMessage()));
+
+//        ErrorResponse response = ErrorResponse.builder()
+//                .status("error")
+//                .error(new ErrorDetails(e.getMessage()))
+//                .build();
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(response);
@@ -44,10 +48,12 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        ErrorResponse response = ErrorResponse.builder()
-                .status("error")
-                .error(new ErrorDetails("입력값 검증 실패", errors))
-                .build();
+        ErrorResponse response = new ErrorResponse("error", new ErrorDetails("입력값 검증 실패", errors));
+
+//        ErrorResponse response = ErrorResponse.builder()
+//                .status("error")
+//                .error(new ErrorDetails("입력값 검증 실패", errors))
+//                .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(response);

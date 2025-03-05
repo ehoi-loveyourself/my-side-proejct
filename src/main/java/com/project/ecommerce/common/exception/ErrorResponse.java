@@ -1,10 +1,11 @@
 package com.project.ecommerce.common.exception;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@Builder
+//@Builder
+@AllArgsConstructor
 public class ErrorResponse {
     private String status;
     private ErrorDetails error;
