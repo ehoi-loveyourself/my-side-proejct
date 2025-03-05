@@ -2,6 +2,7 @@ package com.project.ecommerce.common.exception;
 
 import lombok.Getter;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Getter
@@ -15,6 +16,6 @@ public class ErrorDetails {
 
     public ErrorDetails(String message, Map<String, String> details) {
         this.message = message;
-        this.details = details;
+        this.details = details != null ? details : new HashMap<>();
     }
 }
