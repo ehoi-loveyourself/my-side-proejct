@@ -35,6 +35,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto.UserResponse signUp(UserDto.SignUpRequest request) {
+        /* 사용자 생성 전에 이메일 중복확인을 넣지 않은 이유
+        * 해당 이메일로 가입한 유저는 있는지 없는지에 대한 추적이 될 수 있다는 피드백을 받음
+        * 그런데 사실 실무에서는 이메일 중복확인 메서드가 따로 있을 것이기 때문에
+        * 회원가입 로직에서 더블체크하는 정도로 역할 한다고만 생각함
+        * */
+
         // 사용자 생성
         User user = User.builder()
                 .email(request.getEmail())
