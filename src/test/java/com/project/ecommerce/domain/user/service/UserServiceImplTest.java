@@ -29,12 +29,17 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
-    @Mock private UserRepository userRepository;
-    @Mock private PasswordEncoder passwordEncoder;
-    @Mock private AuthenticationManager authenticationManager;
-    @Mock private JwtTokenProvider jwtTokenProvider;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private AuthenticationManager authenticationManager;
+    @Mock
+    private JwtTokenProvider jwtTokenProvider;
 
-    @InjectMocks private UserServiceImpl userService;
+    @InjectMocks
+    private UserServiceImpl userService;
 
     private User user;
     private UserDto.SignUpRequest signUpRequest;
@@ -119,7 +124,7 @@ class UserServiceImplTest {
         verify(jwtTokenProvider).createToken(authentication);
         verify(userRepository).findByEmail(loginRequest.getEmail());
     }
-    
+
     @Test
     void 미존재회원_로그인_테스트_실패() throws Exception {
         // given
@@ -226,7 +231,7 @@ class UserServiceImplTest {
 
         // when
         userService.updatePassword("test@example.com", updatePasswordRequest);
-        
+
         // then
         assertThat(user.getPassword()).isEqualTo("newEncodedPassword");
 
@@ -235,31 +240,45 @@ class UserServiceImplTest {
         verify(passwordEncoder).matches("newPassword123", "encodedPassword");
         verify(passwordEncoder).encode("newPassword123");
     }
-    
+
     @Test
     void 비밀번호_수정_테스트_실패_현재비밀번호틀림() throws Exception {
         // given
-        
-        // when 
-        
-        // then
+        UserDto.UpdatePasswordRequest updatePasswordRequest = UserDto.UpdatePasswordRequest.builder()
+                .currentPassword("wrongPassword")
+                .newPassword("newPassword123")
+                .build();
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(updatePasswordRequest.getCurrentPassword(), "encodedPassword")).thenReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> userService.updatePassword("test@example.com", updatePasswordRequest))
+                .isInstanceOf(UserException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST)
+                .hasMessageContaining(UserErrorMessages.INCORRECT_PASSWORD);
+
+
+        verify(userRepository).findByEmail(anyString());
+        verify(passwordEncoder).matches(updatePasswordRequest.getCurrentPassword(), user.getPassword());
+        verify(passwordEncoder, never()).encode(updatePasswordRequest.getNewPassword());
     }
-    
+
     @Test
     void 비밀번호_수정_테스트_실패_현재비밀번호와같은비밀번호로수정() throws Exception {
         // given
-        
+
         // when 
-        
+
         // then
     }
-    
+
     @Test
     void 비밀번호_수정_테스트_실패_8자리미만비밀번호로수정() throws Exception {
         // given
-        
+
         // when 
-        
+
         // then
     }
 }
