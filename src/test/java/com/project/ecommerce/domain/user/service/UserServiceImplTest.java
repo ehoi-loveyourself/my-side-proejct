@@ -210,4 +210,56 @@ class UserServiceImplTest {
         verify(userRepository).findByEmail("test@example.com");
         verify(userRepository, never()).save(any(User.class)); // JPA 더티체킹 기능으로 save()를 호출하지 않는지 검증
     }
+
+    @Test
+    void 비밀번호_수정_테스트_성공() throws Exception {
+        // given
+        UserDto.UpdatePasswordRequest updatePasswordRequest = UserDto.UpdatePasswordRequest.builder()
+                .currentPassword("encodedPassword")
+                .newPassword("newPassword123")
+                .build();
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("encodedPassword", "encodedPassword")).thenReturn(true);
+        when(passwordEncoder.matches("newPassword123", "encodedPassword")).thenReturn(false);
+        when(passwordEncoder.encode(anyString())).thenReturn("newEncodedPassword");
+
+        // when
+        userService.updatePassword("test@example.com", updatePasswordRequest);
+        
+        // then
+        assertThat(user.getPassword()).isEqualTo("newEncodedPassword");
+
+        verify(userRepository).findByEmail(anyString());
+        verify(passwordEncoder).matches("encodedPassword", "encodedPassword");
+        verify(passwordEncoder).matches("newPassword123", "encodedPassword");
+        verify(passwordEncoder).encode("newPassword123");
+    }
+    
+    @Test
+    void 비밀번호_수정_테스트_실패_현재비밀번호틀림() throws Exception {
+        // given
+        
+        // when 
+        
+        // then
+    }
+    
+    @Test
+    void 비밀번호_수정_테스트_실패_현재비밀번호와같은비밀번호로수정() throws Exception {
+        // given
+        
+        // when 
+        
+        // then
+    }
+    
+    @Test
+    void 비밀번호_수정_테스트_실패_8자리미만비밀번호로수정() throws Exception {
+        // given
+        
+        // when 
+        
+        // then
+    }
 }
