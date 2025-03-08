@@ -168,4 +168,46 @@ class UserServiceImplTest {
 
         verify(userRepository).findByEmail("nonexisting@example.com");
     }
+
+    @Test
+    void 회원정보_수정_테스트_성공() throws Exception {
+        // given
+        UserDto.UpdateRequest updateRequest = UserDto.UpdateRequest.builder()
+                .name("Updated name")
+                .build();
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+
+        // when
+        UserDto.UserResponse response = userService.updateUser("test@example.com", updateRequest);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getName()).isEqualTo("Updated name");
+
+        verify(userRepository).findByEmail("test@example.com");
+        verify(userRepository, never()).save(any(User.class)); // JPA 더티체킹 기능으로 save()를 호출하지 않는지 검증
+    }
+
+    @Test
+    void 회원정보_수정_테스트_변화없음() throws Exception {
+        // given
+        UserDto.UpdateRequest updateRequest = UserDto.UpdateRequest.builder()
+                .name("")
+                .build();
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        String originName = user.getName();
+
+        // when
+        UserDto.UserResponse response = userService.updateUser("test@example.com", updateRequest);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getName()).isNotEqualTo("Updated name");
+        assertThat(response.getName()).isEqualTo(originName);
+
+        verify(userRepository).findByEmail("test@example.com");
+        verify(userRepository, never()).save(any(User.class)); // JPA 더티체킹 기능으로 save()를 호출하지 않는지 검증
+    }
 }
