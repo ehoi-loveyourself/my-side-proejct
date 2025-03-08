@@ -154,4 +154,18 @@ class UserServiceImplTest {
 
         verify(userRepository).findByEmail("test@example.com");
     }
+
+    @Test
+    void 사용자_조회_테스트_실패() throws Exception {
+        // given
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> userService.currentUser("nonexisting@example.com"))
+                .isInstanceOf(UserException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND)
+                .hasMessageContaining(UserErrorMessages.NOT_FOUND_USER);
+
+        verify(userRepository).findByEmail("nonexisting@example.com");
+    }
 }
