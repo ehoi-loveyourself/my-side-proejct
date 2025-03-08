@@ -258,7 +258,6 @@ class UserServiceImplTest {
                 .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST)
                 .hasMessageContaining(UserErrorMessages.INCORRECT_PASSWORD);
 
-
         verify(userRepository).findByEmail(anyString());
         verify(passwordEncoder).matches(updatePasswordRequest.getCurrentPassword(), user.getPassword());
         verify(passwordEncoder, never()).encode(updatePasswordRequest.getNewPassword());
@@ -267,10 +266,24 @@ class UserServiceImplTest {
     @Test
     void 비밀번호_수정_테스트_실패_현재비밀번호와같은비밀번호로수정() throws Exception {
         // given
+        UserDto.UpdatePasswordRequest updatePasswordRequest = UserDto.UpdatePasswordRequest.builder()
+                .currentPassword("encodedPassword")
+                .newPassword("encodedPassword")
+                .build();
 
-        // when 
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches(updatePasswordRequest.getCurrentPassword(), user.getPassword())).thenReturn(true);
+        when(passwordEncoder.matches(updatePasswordRequest.getNewPassword(), user.getPassword())).thenReturn(true);
 
-        // then
+        // when & then
+        assertThatThrownBy(() -> userService.updatePassword("test@example.com", updatePasswordRequest))
+                .isInstanceOf(UserException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST)
+                .hasMessageContaining(UserErrorMessages.SAME_WITH_BEFORE_PASSWORD);
+
+        verify(userRepository).findByEmail(anyString());
+        verify(passwordEncoder, times(2)).matches(updatePasswordRequest.getCurrentPassword(), user.getPassword());
+        verify(passwordEncoder, never()).encode(updatePasswordRequest.getNewPassword());
     }
 
     @Test
