@@ -72,6 +72,7 @@ public class UserDto {
     }
 
     @Getter
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdateRequest {
@@ -81,6 +82,7 @@ public class UserDto {
     }
 
     @Getter
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdatePasswordRequest {
