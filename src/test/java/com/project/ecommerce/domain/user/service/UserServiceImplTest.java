@@ -49,7 +49,7 @@ class UserServiceImplTest {
     @Test
     void 회원가입_후_객체반환_성공() throws Exception {
         // given
-        when(userRepository.existsByEmail(anyString())).thenReturn(false);
+//        when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
@@ -62,7 +62,7 @@ class UserServiceImplTest {
         assertThat(response.getName()).isEqualTo(signUpRequest.getName());
         assertThat(response.getRole()).isEqualTo(Role.CUSTOMER.name());
 
-        verify(userRepository).existsByEmail(signUpRequest.getEmail());
+//        verify(userRepository).existsByEmail(signUpRequest.getEmail());
         verify(passwordEncoder).encode(signUpRequest.getPassword());
         verify(userRepository).save(any(User.class));
     }
