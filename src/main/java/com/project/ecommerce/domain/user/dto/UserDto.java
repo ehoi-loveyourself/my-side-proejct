@@ -50,6 +50,7 @@ public class UserDto {
     }
 
     @Getter
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LoginRequest {
