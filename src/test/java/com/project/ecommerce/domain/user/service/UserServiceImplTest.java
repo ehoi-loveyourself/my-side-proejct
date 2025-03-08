@@ -121,7 +121,7 @@ class UserServiceImplTest {
     }
     
     @Test
-    void 미존재회원_로그인_테스트() throws Exception {
+    void 미존재회원_로그인_테스트_실패() throws Exception {
         // given
         when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
         when(jwtTokenProvider.createToken(any(Authentication.class))).thenReturn("jwt.token.here");
@@ -137,5 +137,21 @@ class UserServiceImplTest {
         verify(authenticationManager).authenticate(any(Authentication.class));
         verify(jwtTokenProvider).createToken(authentication);
         verify(userRepository).findByEmail(loginRequest.getEmail());
+    }
+
+    @Test
+    void 사용자_조회_테스트_성공() throws Exception {
+        // given
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+
+        // when
+        UserDto.UserResponse response = userService.currentUser("test@example.com");
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getEmail()).isEqualTo(user.getEmail());
+        assertThat(response.getName()).isEqualTo(user.getName());
+
+        verify(userRepository).findByEmail("test@example.com");
     }
 }
