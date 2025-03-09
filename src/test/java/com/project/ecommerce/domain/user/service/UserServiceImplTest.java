@@ -289,9 +289,23 @@ class UserServiceImplTest {
     @Test
     void 비밀번호_수정_테스트_실패_8자리미만비밀번호로수정() throws Exception {
         // given
+        UserDto.UpdatePasswordRequest request = UserDto.UpdatePasswordRequest.builder()
+                .currentPassword("currentPassword")
+                .newPassword("short")
+                .build();
 
-        // when 
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("currentPassword", user.getPassword())).thenReturn(true);
+        when(passwordEncoder.matches("short", user.getPassword())).thenReturn(false);
 
-        // then
+        // when & then
+        assertThatThrownBy(() -> userService.updatePassword("test@example.com", request))
+                .isInstanceOf(UserException.class)
+                .hasFieldOrPropertyWithValue("status", HttpStatus.BAD_REQUEST)
+                .hasMessageContaining(UserErrorMessages.MIN_PASSWORD_LENGTH_ERROR);
+
+        verify(userRepository).findByEmail("test@example.com");
+        verify(passwordEncoder, times(2)).matches(anyString(), eq(user.getPassword()));
+        verify(passwordEncoder, never()).encode(anyString());
     }
 }
