@@ -20,7 +20,7 @@ spring:
 
 jwt:
   secret: D0BUrCTCH2C0ima4cy7k5hPATiO90GU8dDw8mBj6LfAu07+BVkueaknyKqfQ6m+wKqCfVfNxaAnK2sJAhZlV4w==
-  token-validity-in-seconds: 60 * 30
+  token-validity-in-seconds: 1800
 
 server:
   port: 8080
