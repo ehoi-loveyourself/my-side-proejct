@@ -104,4 +104,21 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.status").value("error"))
                 .andExpect(jsonPath("$.error.message").value("이미 사용 중인 이메일입니다. 다른 이메일을 입력해주세요"));
     }
+
+    @Test
+    void 로그인_테스트_성공() throws Exception {
+        // given
+        UserDto.LoginRequest request = UserDto.LoginRequest.builder()
+                .email("test@example.com")
+                .password("password123")
+                .build();
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.data.token").isNotEmpty());
+    }
 }
