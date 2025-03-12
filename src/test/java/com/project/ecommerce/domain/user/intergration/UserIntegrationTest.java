@@ -166,4 +166,22 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.data.email").value("test@example.com"))
                 .andExpect(jsonPath("$.data.name").value(newName));
     }
+
+    @Test
+    void 비밀번호_수정_테스트_성공() throws Exception {
+        // given
+        String currentPassword = "password123";
+        String newPassword = "newPassword123";
+        UserDto.UpdatePasswordRequest request = new UserDto.UpdatePasswordRequest().builder()
+                .currentPassword(currentPassword)
+                .newPassword(newPassword)
+                .build();
+
+        // when & then
+        mockMvc.perform(put("/api/v1/users/me/password")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
 }
