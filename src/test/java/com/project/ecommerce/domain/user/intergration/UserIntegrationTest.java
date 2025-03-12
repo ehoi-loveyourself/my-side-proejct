@@ -183,5 +183,19 @@ public class UserIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
+
+        // 새 비밀번호로 로그인 시도
+        UserDto.LoginRequest loginRequest = UserDto.LoginRequest.builder()
+                .email("test@example.com")
+                .password(newPassword)
+                .build();
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.data.token").isNotEmpty());
     }
 }
