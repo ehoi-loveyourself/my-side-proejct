@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 회원가입
+     *
      * @param request
      * @return 회원가입 후 회원 dto
      */
@@ -36,10 +37,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto.UserResponse signUp(UserDto.SignUpRequest request) {
         /* 사용자 생성 전에 이메일 중복확인을 넣지 않은 이유
-        * 해당 이메일로 가입한 유저는 있는지 없는지에 대한 추적이 될 수 있다는 피드백을 받음
-        * 그런데 사실 실무에서는 이메일 중복확인 메서드가 따로 있을 것이기 때문에
-        * 회원가입 로직에서 더블체크하는 정도로 역할 한다고만 생각함
-        * */
+         * 해당 이메일로 가입한 유저는 있는지 없는지에 대한 추적이 될 수 있다는 피드백을 받음
+         * 그런데 사실 실무에서는 이메일 중복확인 메서드가 따로 있을 것이기 때문에
+         * 회원가입 로직에서 더블체크하는 정도로 역할 한다고만 생각함
+         * */
 
         // 사용자 생성
         User user = User.builder()
@@ -59,23 +60,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto.TokenResponse login(UserDto.LoginRequest request) {
-        // Spring Security 의 인증 매니저를 사용하여 인증
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+        try {
 
-        Authentication authentication = authenticationManager
-                .authenticate(authenticationToken);
+            // Spring Security 의 인증 매니저를 사용하여 인증
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
-        // 인증 정보를 기반으로 JWT 토큰 생성
-        String token = jwtTokenProvider.createToken(authentication);
+            Authentication authentication = authenticationManager
+                    .authenticate(authenticationToken);
 
-        // 사용자 정보 조회
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
+            // 인증 정보를 기반으로 JWT 토큰 생성
+            String token = jwtTokenProvider.createToken(authentication);
 
-        return UserDto.TokenResponse.builder()
-                .token(token)
+            // 사용자 정보 조회
+            User user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
+
+            return UserDto.TokenResponse.builder()
+                    .token(token)
 //                .user(UserDto.UserResponse.of(user)) // todo: 별도 api 로 분리
-                .build();
+                    .build();
+        } catch (Exception e) {
+            throw new UserException(UserErrorMessages.WRONG_LOGIN_INFO, HttpStatus.UNAUTHORIZED);
+        }
     }
 
     @Override
