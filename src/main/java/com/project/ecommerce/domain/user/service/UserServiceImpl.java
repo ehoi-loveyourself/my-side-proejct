@@ -61,7 +61,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto.TokenResponse login(UserDto.LoginRequest request) {
         try {
-
             // Spring Security 의 인증 매니저를 사용하여 인증
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
@@ -80,6 +79,7 @@ public class UserServiceImpl implements UserService {
 //                .user(UserDto.UserResponse.of(user)) // todo: 별도 api 로 분리
                     .build();
         } catch (Exception e) {
+            e.printStackTrace();
             throw new UserException(UserErrorMessages.WRONG_LOGIN_INFO, HttpStatus.UNAUTHORIZED);
         }
     }

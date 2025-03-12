@@ -1,5 +1,6 @@
 package com.project.ecommerce.common.config;
 
+import com.project.ecommerce.common.utils.CustomAuthenticationEntryPoint;
 import com.project.ecommerce.common.utils.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +38,9 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                )
                 .headers(headers -> headers
                         // H2 Console을 iFrame 내에서 정상적으로 띄우기 위해 필요함
                         .frameOptions(frame -> frame.sameOrigin())
@@ -44,7 +48,7 @@ public class SecurityConfig {
                 // JwtAuthenticationFilter를 UsernamePasswordAuthenticationFilter 앞에 추가하여 JWT 인증을 수행
                 // 이 설정이 없으면 JWT 기반 인증이 동작하지 않음.
                 .addFilterBefore(jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class)
+        UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

@@ -121,4 +121,19 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.data.token").isNotEmpty());
     }
+
+    @Test
+    void 로그인_테스트_실패() throws Exception {
+        // given
+        UserDto.LoginRequest loginRequest = UserDto.LoginRequest.builder()
+                .email("test@example.com")
+                .password("wrongpassword")
+                .build();
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized());
+    }
 }
