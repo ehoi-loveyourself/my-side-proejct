@@ -15,8 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -147,5 +146,24 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.data.email").value("test@example.com"))
                 .andExpect(jsonPath("$.data.name").value("test user"));
+    }
+
+    @Test
+    void 사용자_정보_수정_테스트_성공() throws Exception {
+        // given
+        String newName = "new name";
+        UserDto.UpdateRequest request = UserDto.UpdateRequest.builder()
+                .name(newName)
+                .build();
+
+        // when & then
+        mockMvc.perform(put("/api/v1/users/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.data.email").value("test@example.com"))
+                .andExpect(jsonPath("$.data.name").value(newName));
     }
 }
