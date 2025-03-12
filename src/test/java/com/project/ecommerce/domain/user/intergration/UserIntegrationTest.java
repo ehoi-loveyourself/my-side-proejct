@@ -1,6 +1,7 @@
 package com.project.ecommerce.domain.user.intergration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.ecommerce.common.exception.UserErrorMessages;
 import com.project.ecommerce.domain.user.dto.UserDto;
 import com.project.ecommerce.domain.user.entity.Role;
 import com.project.ecommerce.domain.user.entity.User;
@@ -197,5 +198,25 @@ public class UserIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"))
                 .andExpect(jsonPath("$.data.token").isNotEmpty());
+    }
+
+    @Test
+    void 비밀번호_수정_테스트_실패() throws Exception {
+        // given
+        String wrongPassword = "wrongPassword";
+        String newPassword = "newPassword123";
+        UserDto.UpdatePasswordRequest request = new UserDto.UpdatePasswordRequest().builder()
+                .currentPassword(wrongPassword)
+                .newPassword(newPassword)
+                .build();
+
+        // when & then
+        mockMvc.perform(put("/api/v1/users/me/password")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.error.message").value(UserErrorMessages.INCORRECT_PASSWORD));
     }
 }
