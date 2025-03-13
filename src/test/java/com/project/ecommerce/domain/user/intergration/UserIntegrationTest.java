@@ -1,6 +1,7 @@
 package com.project.ecommerce.domain.user.intergration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.ecommerce.common.exception.UserErrorMessages;
 import com.project.ecommerce.domain.user.dto.UserDto;
 import com.project.ecommerce.domain.user.entity.Role;
 import com.project.ecommerce.domain.user.entity.User;
@@ -15,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -86,7 +87,7 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.data.name").value("new user"))
                 .andExpect(jsonPath("$.data.role").value("CUSTOMER"));
     }
-    
+
     @Test
     void 회원가입_테스트_실패_중복이메일() throws Exception {
         // given
@@ -125,7 +126,7 @@ public class UserIntegrationTest {
     @Test
     void 로그인_테스트_실패() throws Exception {
         // given
-        UserDto.LoginRequest request = UserDto.LoginRequest.builder()
+        UserDto.LoginRequest loginRequest = UserDto.LoginRequest.builder()
                 .email("test@example.com")
                 .password("wrongpassword")
                 .build();
@@ -133,7 +134,89 @@ public class UserIntegrationTest {
         // when & then
         mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void 현재_사용자_조회_테스트_성공() throws Exception {
+        // when & then
+        mockMvc.perform(get("/api/v1/users/me")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.data.email").value("test@example.com"))
+                .andExpect(jsonPath("$.data.name").value("test user"));
+    }
+
+    @Test
+    void 사용자_정보_수정_테스트_성공() throws Exception {
+        // given
+        String newName = "new name";
+        UserDto.UpdateRequest request = UserDto.UpdateRequest.builder()
+                .name(newName)
+                .build();
+
+        // when & then
+        mockMvc.perform(put("/api/v1/users/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.data.email").value("test@example.com"))
+                .andExpect(jsonPath("$.data.name").value(newName));
+    }
+
+    @Test
+    void 비밀번호_수정_테스트_성공() throws Exception {
+        // given
+        String currentPassword = "password123";
+        String newPassword = "newPassword123";
+        UserDto.UpdatePasswordRequest request = new UserDto.UpdatePasswordRequest().builder()
+                .currentPassword(currentPassword)
+                .newPassword(newPassword)
+                .build();
+
+        // when & then
+        mockMvc.perform(put("/api/v1/users/me/password")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        // 새 비밀번호로 로그인 시도
+        UserDto.LoginRequest loginRequest = UserDto.LoginRequest.builder()
+                .email("test@example.com")
+                .password(newPassword)
+                .build();
+
+        // when & then
+        mockMvc.perform(post("/api/v1/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("success"))
+                .andExpect(jsonPath("$.data.token").isNotEmpty());
+    }
+
+    @Test
+    void 비밀번호_수정_테스트_실패() throws Exception {
+        // given
+        String wrongPassword = "wrongPassword";
+        String newPassword = "newPassword123";
+        UserDto.UpdatePasswordRequest request = new UserDto.UpdatePasswordRequest().builder()
+                .currentPassword(wrongPassword)
+                .newPassword(newPassword)
+                .build();
+
+        // when & then
+        mockMvc.perform(put("/api/v1/users/me/password")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("error"))
+                .andExpect(jsonPath("$.error.message").value(UserErrorMessages.INCORRECT_PASSWORD));
     }
 }
