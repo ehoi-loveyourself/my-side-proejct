@@ -179,4 +179,14 @@ class ProductServiceImplTest {
 
         verify(productRepository).findByNameContainingIgnoreCaseAndStatus(keyword, ProductStatus.ACTIVE, pageable);
     }
+
+    @DisplayName("판매자가 상품을 등록하면 성공적으로 저장된다")
+    @Test
+    void 상품_등록_테스트_판매자용_성공() throws Exception {
+        // given
+
+        // when
+
+        // then
+    }
 }
