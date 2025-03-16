@@ -58,4 +58,8 @@ public class Product extends BaseEntity {
         this.status = status;
         this.productCategories = productCategories;
     }
+
+    public void setProductCategoriesForTest(List<ProductCategory> productCategories) {
+        this.productCategories = productCategories;
+    }
 }
