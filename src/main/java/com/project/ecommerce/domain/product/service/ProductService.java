@@ -9,4 +9,6 @@ public interface ProductService {
     Page<ProductDto.ProductSimpleResponse> getProductList(Pageable pageable);
 
     ProductDto.ProductResponse getProduct(Long productId);
+
+    Page<ProductDto.ProductSimpleResponse> searchProduct(String keyword, Pageable pageable);
 }

@@ -31,4 +31,12 @@ public class ProductServiceImpl implements ProductService {
 
         return ProductDto.ProductResponse.of(product);
     }
+
+    @Override
+    public Page<ProductDto.ProductSimpleResponse> searchProduct(String keyword, Pageable pageable) {
+        return productRepository.findByNameContainingIgnoreCaseAndStatus(keyword, ProductStatus.ACTIVE, pageable)
+                .map(ProductDto.ProductSimpleResponse::of);
+
+
+    }
 }
