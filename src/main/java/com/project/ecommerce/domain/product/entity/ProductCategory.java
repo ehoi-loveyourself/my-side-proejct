@@ -2,9 +2,7 @@ package com.project.ecommerce.domain.product.entity;
 
 import com.project.ecommerce.domain.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -24,4 +22,10 @@ public class ProductCategory extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @Builder
+    public ProductCategory(Product product, Category category) {
+        this.product = product;
+        this.category = category;
+    }
 }

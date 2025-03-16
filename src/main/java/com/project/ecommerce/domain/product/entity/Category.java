@@ -3,6 +3,7 @@ package com.project.ecommerce.domain.product.entity;
 import com.project.ecommerce.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -34,4 +35,13 @@ public class Category extends BaseEntity {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<ProductCategory> productCategories = new ArrayList<>();
+
+    @Builder
+    public Category(String name, String description, Category parentCategory, List<Category> childrenCategories, List<ProductCategory> productCategories) {
+        this.name = name;
+        this.description = description;
+        this.parentCategory = parentCategory;
+        this.childrenCategories = childrenCategories;
+        this.productCategories = productCategories;
+    }
 }
