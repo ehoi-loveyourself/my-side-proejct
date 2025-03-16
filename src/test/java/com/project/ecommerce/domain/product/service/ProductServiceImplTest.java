@@ -156,4 +156,27 @@ class ProductServiceImplTest {
             e.printStackTrace();
         }
     }
+
+    @DisplayName("상품명 키워드로 검색 시 해당 키워드를 포함하는 활성화된 상품만 조회된다")
+    @Test
+    void 상품_검색_테스트_성송() throws Exception {
+        // given
+        String keyword = "맥북";
+        Pageable pageable = PageRequest.of(0, 20, Sort.by("id").descending());
+        List<Product> products = Collections.singletonList(product);
+        Page<Product> productPage = new PageImpl<>(products, pageable, products.size());
+
+        when(productRepository.findByNameContainingIgnoreCaseAndStatus(keyword, ProductStatus.ACTIVE, pageable)).thenReturn(productPage);
+
+        // when
+        Page<ProductDto.ProductSimpleResponse> response = productService.searchProduct(keyword, pageable);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getTotalElements()).isEqualTo(products.size());
+        assertThat(response.getContent().get(0).getName()).isEqualTo(product.getName());
+        assertThat(response.getContent().get(0).getName()).contains(keyword);
+
+        verify(productRepository).findByNameContainingIgnoreCaseAndStatus(keyword, ProductStatus.ACTIVE, pageable);
+    }
 }

@@ -8,10 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +32,16 @@ public class ProductController {
     @GetMapping("/{productId}")
     public ResponseEntity<Map<String, Object>> getProduct(@PathVariable Long productId) {
         ProductDto.ProductResponse response = productService.getProduct(productId);
+
+        return ResponseEntity.ok(createSuccessResponse(response));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Map<String, Object>> searchProducts(
+            @RequestParam String keyword,
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<ProductDto.ProductSimpleResponse> response = productService.searchProduct(keyword, pageable);
 
         return ResponseEntity.ok(createSuccessResponse(response));
     }
