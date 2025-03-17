@@ -28,4 +28,8 @@ public class ProductCategory extends BaseEntity {
         this.product = product;
         this.category = category;
     }
+
+    public void mapProduct(Product product) {
+        this.product = product;
+    }
 }

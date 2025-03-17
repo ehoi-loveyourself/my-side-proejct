@@ -7,6 +7,7 @@ import com.project.ecommerce.domain.product.entity.Category;
 import com.project.ecommerce.domain.product.entity.Product;
 import com.project.ecommerce.domain.product.entity.ProductCategory;
 import com.project.ecommerce.domain.product.entity.ProductStatus;
+import com.project.ecommerce.domain.product.repository.CategoryRepository;
 import com.project.ecommerce.domain.product.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +28,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +37,9 @@ class ProductServiceImplTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private CategoryRepository categoryRepository;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -178,5 +185,54 @@ class ProductServiceImplTest {
         assertThat(response.getContent().get(0).getName()).contains(keyword);
 
         verify(productRepository).findByNameContainingIgnoreCaseAndStatus(keyword, ProductStatus.ACTIVE, pageable);
+    }
+
+    @DisplayName("판매자가 상품을 등록하면 성공적으로 저장된다")
+    @Test
+    void 상품_등록_테스트_판매자용_성공() throws Exception {
+        // given
+        // 1. 상품 등록 request dto 만들기
+        List<Long> categoryIds = Arrays.asList(1L, 2L);
+        ProductDto.ProductRegisterRequest request = ProductDto.ProductRegisterRequest.builder()
+                .name("맥북 에어")
+                .description("맥북 에어 15인치")
+                .price(BigDecimal.valueOf(2_000_000))
+                .stock(10)
+                .imageUrls(Arrays.asList("image1.jpg", "image2.png"))
+                .categoryIds(categoryIds)
+                .build();
+
+        // 2. 등록된 상품 인스턴스 만들기
+        Product savedProduct = Product.builder()
+                .name("맥북 에어")
+                .description("맥북 에어 15인치")
+                .price(BigDecimal.valueOf(2_000_000))
+                .stock(10)
+                .sellerId(SELLER_ID)
+                .imageUrls(Arrays.asList("image1.jpg", "image2.png"))
+                .status(ProductStatus.ACTIVE)
+                .build();
+        savedProduct.addProductCategory(new ProductCategory(savedProduct, category1));
+        savedProduct.addProductCategory(new ProductCategory(savedProduct, category2));
+        setId(savedProduct, 99L);
+
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category1));
+        when(categoryRepository.findById(2L)).thenReturn(Optional.of(category2));
+        when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
+
+        // when
+        ProductDto.ProductResponse response = productService.registerProduct(request, SELLER_ID);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getName()).isEqualTo(savedProduct.getName());
+        assertThat(response.getDescription()).isEqualTo(savedProduct.getDescription());
+        assertThat(response.getPrice()).isEqualTo(savedProduct.getPrice());
+        assertThat(response.getStock()).isEqualTo(savedProduct.getStock());
+        assertThat(response.getSellerId()).isEqualTo(savedProduct.getSellerId());
+        assertThat(response.getImageUrls()).isEqualTo(savedProduct.getImageUrls());
+        assertThat(response.getImageUrls()).containsExactly("image1.jpg", "image2.png");
+        assertThat(response.getStatus()).isEqualTo(ProductStatus.ACTIVE.name());
+        assertThat(response.getCategories()).hasSize(2);
     }
 }

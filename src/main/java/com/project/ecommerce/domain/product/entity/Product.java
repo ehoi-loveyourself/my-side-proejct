@@ -48,18 +48,26 @@ public class Product extends BaseEntity {
     private List<ProductCategory> productCategories = new ArrayList<>();
 
     @Builder
-    public Product(String name, String description, BigDecimal price, int stock, Long sellerId, List<String> imageUrls, ProductStatus status, List<ProductCategory> productCategories) {
+    public Product(String name, String description, BigDecimal price, int stock, Long sellerId, List<String> imageUrls, ProductStatus status) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.stock = stock;
         this.sellerId = sellerId;
-        this.imageUrls = imageUrls;
+        this.imageUrls = imageUrls != null ? imageUrls : new ArrayList<>();
         this.status = status;
-        this.productCategories = productCategories;
     }
 
     public void setProductCategoriesForTest(List<ProductCategory> productCategories) {
         this.productCategories = productCategories;
+    }
+
+    public void addProductCategory(ProductCategory productCategory) {
+        if (this.productCategories == null) {
+            this.productCategories = new ArrayList<>();
+        }
+        this.productCategories.add(productCategory);
+
+        productCategory.mapProduct(this);
     }
 }

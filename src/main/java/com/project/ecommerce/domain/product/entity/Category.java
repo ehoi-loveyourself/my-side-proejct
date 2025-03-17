@@ -37,11 +37,10 @@ public class Category extends BaseEntity {
     private List<ProductCategory> productCategories = new ArrayList<>();
 
     @Builder
-    public Category(String name, String description, Category parentCategory, List<Category> childrenCategories, List<ProductCategory> productCategories) {
+    public Category(String name, String description, Category parentCategory, List<Category> childrenCategories) {
         this.name = name;
         this.description = description;
         this.parentCategory = parentCategory;
         this.childrenCategories = childrenCategories;
-        this.productCategories = productCategories;
     }
 }

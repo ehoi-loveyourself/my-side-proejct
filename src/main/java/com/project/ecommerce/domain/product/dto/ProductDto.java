@@ -2,6 +2,10 @@ package com.project.ecommerce.domain.product.dto;
 
 import com.project.ecommerce.domain.product.entity.Product;
 import com.project.ecommerce.domain.product.entity.ProductCategory;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -70,5 +74,28 @@ public class ProductDto {
                     .categories(categoryResponse)
                     .build();
         }
+    }
+
+    @Getter
+    @Builder
+    public static class ProductRegisterRequest {
+
+        @NotBlank(message = "상품 이름은 필수입니다")
+        private String name;
+
+        private String description;
+
+        @NotNull(message = "가격은 필수입니다")
+        @Min(value = 100, message = "가격은 100원 이상이어야 합니다")
+        private BigDecimal price;
+
+        @NotNull(message = "재고는 필수입니다")
+        @Min(value = 0, message = "재고 수량은 0 이상이어야 합니다")
+        private int stock;
+
+        private List<String> imageUrls;
+
+        @NotEmpty(message = "최소 하나의 카테고리는 필수입니다")
+        private List<Long> categoryIds;
     }
 }
