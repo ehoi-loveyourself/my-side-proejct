@@ -62,4 +62,9 @@ public class Product extends BaseEntity {
     public void setProductCategoriesForTest(List<ProductCategory> productCategories) {
         this.productCategories = productCategories;
     }
+
+    public void addProductCategory(ProductCategory productCategory) {
+        this.productCategories.add(productCategory);
+        productCategory.mapProduct(this);
+    }
 }

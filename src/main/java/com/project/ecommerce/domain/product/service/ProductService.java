@@ -11,4 +11,6 @@ public interface ProductService {
     ProductDto.ProductResponse getProduct(Long productId);
 
     Page<ProductDto.ProductSimpleResponse> searchProduct(String keyword, Pageable pageable);
+
+    ProductDto.ProductResponse registerProduct(ProductDto.ProductRegisterRequest request, long sellerId);
 }
