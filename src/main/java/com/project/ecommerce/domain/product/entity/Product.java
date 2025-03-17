@@ -48,7 +48,7 @@ public class Product extends BaseEntity {
     private List<ProductCategory> productCategories = new ArrayList<>();
 
     @Builder
-    public Product(String name, String description, BigDecimal price, int stock, Long sellerId, List<String> imageUrls, ProductStatus status, List<ProductCategory> productCategories) {
+    public Product(String name, String description, BigDecimal price, int stock, Long sellerId, List<String> imageUrls, ProductStatus status) {
         this.name = name;
         this.description = description;
         this.price = price;
@@ -56,7 +56,6 @@ public class Product extends BaseEntity {
         this.sellerId = sellerId;
         this.imageUrls = imageUrls;
         this.status = status;
-        this.productCategories = productCategories;
     }
 
     public void setProductCategoriesForTest(List<ProductCategory> productCategories) {
