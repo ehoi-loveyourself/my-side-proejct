@@ -213,6 +213,8 @@ class ProductServiceImplTest {
                 .imageUrls(Arrays.asList("image1.jpg", "image2.png"))
                 .status(ProductStatus.ACTIVE)
                 .build();
+        savedProduct.addProductCategory(new ProductCategory(savedProduct, category1));
+        savedProduct.addProductCategory(new ProductCategory(savedProduct, category2));
         setId(savedProduct, 99L);
 
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category1));
