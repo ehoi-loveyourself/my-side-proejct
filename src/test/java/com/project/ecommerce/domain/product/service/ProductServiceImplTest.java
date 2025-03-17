@@ -198,7 +198,6 @@ class ProductServiceImplTest {
                 .description("맥북 에어 15인치")
                 .price(BigDecimal.valueOf(2_000_000))
                 .stock(10)
-                .sellerId(SELLER_ID)
                 .imageUrls(Arrays.asList("image1.jpg", "image2.png"))
                 .categoryIds(categoryIds)
                 .build();

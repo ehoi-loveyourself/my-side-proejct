@@ -93,8 +93,6 @@ public class ProductDto {
         @Min(value = 0, message = "재고 수량은 0 이상이어야 합니다")
         private int stock;
 
-        private Long sellerId;
-
         private List<String> imageUrls;
 
         @NotEmpty(message = "최소 하나의 카테고리는 필수입니다")

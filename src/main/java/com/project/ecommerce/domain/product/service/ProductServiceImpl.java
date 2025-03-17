@@ -54,7 +54,7 @@ public class ProductServiceImpl implements ProductService {
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .stock(request.getStock())
-                .sellerId(request.getSellerId())
+                .sellerId(sellerId)
                 .imageUrls(request.getImageUrls())
 //                .productCategories(request.getCategoryIds())
                 .status(ProductStatus.ACTIVE)
