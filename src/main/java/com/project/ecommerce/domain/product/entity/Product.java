@@ -54,7 +54,7 @@ public class Product extends BaseEntity {
         this.price = price;
         this.stock = stock;
         this.sellerId = sellerId;
-        this.imageUrls = imageUrls;
+        this.imageUrls = imageUrls != null ? imageUrls : new ArrayList<>();
         this.status = status;
     }
 
