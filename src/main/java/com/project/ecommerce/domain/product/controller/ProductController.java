@@ -2,12 +2,16 @@ package com.project.ecommerce.domain.product.controller;
 
 import com.project.ecommerce.domain.product.dto.ProductDto;
 import com.project.ecommerce.domain.product.service.ProductService;
+import com.project.ecommerce.domain.user.entity.User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -42,6 +46,17 @@ public class ProductController {
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<ProductDto.ProductSimpleResponse> response = productService.searchProduct(keyword, pageable);
+
+        return ResponseEntity.ok(createSuccessResponse(response));
+    }
+
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> registerProduct(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody ProductDto.ProductRegisterRequest request
+    ) {
+        Long sellerId = ((User) userDetails).getId();
+        ProductDto.ProductResponse response = productService.registerProduct(request, sellerId);
 
         return ResponseEntity.ok(createSuccessResponse(response));
     }
