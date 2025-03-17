@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -56,23 +58,26 @@ public class ProductServiceImpl implements ProductService {
                 .stock(request.getStock())
                 .sellerId(sellerId)
                 .imageUrls(request.getImageUrls())
-//                .productCategories(request.getCategoryIds())
                 .status(ProductStatus.ACTIVE)
                 .build();
 
         // 카테고리 연결
-        for (Long categoryId : request.getCategoryIds()) {
-            Category category = categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new CategoryException(CategoryErrorMessages.NOT_FOUND_CATEGORY, HttpStatus.NOT_FOUND));
-
-            ProductCategory productCategory = new ProductCategory(newProduct, category);
-            newProduct.addProductCategory(productCategory);
-        }
+        addCategoriesToProduct(request.getCategoryIds(), newProduct);
 
         // 상품 저장
         Product savedProduct = productRepository.save(newProduct);
 
         // 응답 생성
         return ProductDto.ProductResponse.of(savedProduct);
+    }
+
+    private void addCategoriesToProduct(List<Long> categoryIds, Product product) {
+        for (Long categoryId : categoryIds) {
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new CategoryException(CategoryErrorMessages.NOT_FOUND_CATEGORY, HttpStatus.NOT_FOUND));
+
+            ProductCategory productCategory = new ProductCategory(product, category);
+            product.addProductCategory(productCategory);
+        }
     }
 }
