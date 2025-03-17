@@ -63,7 +63,11 @@ public class Product extends BaseEntity {
     }
 
     public void addProductCategory(ProductCategory productCategory) {
+        if (this.productCategories == null) {
+            this.productCategories = new ArrayList<>();
+        }
         this.productCategories.add(productCategory);
+
         productCategory.mapProduct(this);
     }
 }
