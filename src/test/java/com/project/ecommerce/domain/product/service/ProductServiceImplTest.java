@@ -29,8 +29,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
@@ -249,7 +248,7 @@ class ProductServiceImplTest {
                 .price(updatedPrice)
                 .build();
 
-        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdAndSellerId(PRODUCT_ID, SELLER_ID)).thenReturn(Optional.of(product));
 
         // when
         ProductDto.ProductResponse response = productService.updateProduct(PRODUCT_ID, request, SELLER_ID);
@@ -259,6 +258,14 @@ class ProductServiceImplTest {
         assertThat(response.getName()).isEqualTo(updatedName);
         assertThat(response.getDescription()).isEqualTo(updatedDesc);
         assertThat(response.getPrice()).isEqualTo(updatedPrice);
+
+        // 직접 product 객체의 값이 변경되었는지 검증 -> 더티 체킹이 제대로 동작했는지 확인 가능
+        assertThat(product.getName()).isEqualTo(updatedName);
+        assertThat(product.getDescription()).isEqualTo(updatedDesc);
+        assertThat(product.getPrice()).isEqualTo(updatedPrice);
+
+        // save() 로직을 작성하지 않았는데, save()를 호출하지 않고도 더티 체킹이 동작했는지 확인 가능
+        verify(productRepository, never()).save(any());
     }
 
     // todo: 없는 상품을 변경하고자 했을 때
