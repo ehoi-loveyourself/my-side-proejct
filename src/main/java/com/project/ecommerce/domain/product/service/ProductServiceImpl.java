@@ -11,6 +11,7 @@ import com.project.ecommerce.domain.product.entity.ProductCategory;
 import com.project.ecommerce.domain.product.entity.ProductStatus;
 import com.project.ecommerce.domain.product.repository.CategoryRepository;
 import com.project.ecommerce.domain.product.repository.ProductRepository;
+import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -69,6 +71,38 @@ public class ProductServiceImpl implements ProductService {
 
         // 응답 생성
         return ProductDto.ProductResponse.of(savedProduct);
+    }
+
+    @Override
+    @Transactional
+    public ProductDto.ProductResponse updateProduct(Long productId, ProductDto.ProductUpdateRequest request, long sellerId) {
+        // 수정해야 할 상품 찾기
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
+
+        // 해당 판매자의 상품이 맞는지 확인하기
+        if (product.getSellerId() != sellerId) {
+            throw new ProductException(ProductErrorMessages.CANNOT_UPDATE_PRODUCT, HttpStatus.BAD_REQUEST);
+        }
+
+        // 상품 수정하기
+        if (StringUtils.isNotBlank(request.getName())) {
+            product.updateName(request.getName());
+        }
+
+        if (StringUtils.isNotBlank(request.getDescription())) {
+            product.updateDescription(request.getDescription());
+        }
+
+        if (request.getPrice() != null) {
+            if (request.getPrice().compareTo(BigDecimal.valueOf(100)) < 0) {
+                throw new ProductException(ProductErrorMessages.INVALID_PRICE, HttpStatus.BAD_REQUEST);
+            }
+
+            product.updatePrice(request.getPrice());
+        }
+
+        return ProductDto.ProductResponse.of(product);
     }
 
     private void addCategoriesToProduct(List<Long> categoryIds, Product product) {
