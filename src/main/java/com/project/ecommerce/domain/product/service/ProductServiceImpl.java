@@ -11,7 +11,6 @@ import com.project.ecommerce.domain.product.entity.ProductCategory;
 import com.project.ecommerce.domain.product.entity.ProductStatus;
 import com.project.ecommerce.domain.product.repository.CategoryRepository;
 import com.project.ecommerce.domain.product.repository.ProductRepository;
-import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
