@@ -17,9 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
+import org.springframework.http.HttpStatus;
 
-import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -248,7 +247,7 @@ class ProductServiceImplTest {
                 .price(updatedPrice)
                 .build();
 
-        when(productRepository.findByIdAndSellerId(PRODUCT_ID, SELLER_ID)).thenReturn(Optional.of(product));
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
 
         // when
         ProductDto.ProductResponse response = productService.updateProduct(PRODUCT_ID, request, SELLER_ID);
@@ -281,7 +280,7 @@ class ProductServiceImplTest {
                 .price(updatedPrice)
                 .build();
 
-        when(productRepository.findByIdAndSellerId(PRODUCT_ID, SELLER_ID)).thenReturn(Optional.empty());
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(()-> productService.updateProduct(PRODUCT_ID, request, SELLER_ID))
@@ -300,7 +299,7 @@ class ProductServiceImplTest {
                 .name(updatedName)
                 .build();
 
-        when(productRepository.findByIdAndSellerId(PRODUCT_ID, SELLER_ID)).thenReturn(Optional.of(product));
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
 
         // when
         ProductDto.ProductResponse response = productService.updateProduct(PRODUCT_ID, request, SELLER_ID);
@@ -321,5 +320,48 @@ class ProductServiceImplTest {
 
         // save() 로직을 작성하지 않았는데, save()를 호출하지 않고도 더티 체킹이 동작했는지 확인 가능
         verify(productRepository, never()).save(any());
+    }
+
+    @DisplayName("판매자가 상품을 삭제하면 상품이 삭제된다")
+    @Test
+    void 상품_삭제_테스트_판매자용_성공() throws Exception {
+        // given
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+
+        // when
+        productService.deleteProduct(PRODUCT_ID, SELLER_ID);
+
+        // then
+        Product deleted = productRepository.findById(PRODUCT_ID)
+                .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
+
+        assertThat(deleted).isNotNull();
+        assertThat(deleted.getStatus()).isEqualTo(ProductStatus.INACTIVE);
+
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @DisplayName("존재하지 않는 상품을 삭제하려고 할 때 에러가 발생한다")
+    @Test
+    void 미존재_상품_삭제_테스트_판매자용() throws Exception {
+        // given
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> productService.deleteProduct(PRODUCT_ID, SELLER_ID))
+                .isInstanceOf(ProductException.class)
+                .hasMessageContaining(ProductErrorMessages.NOT_FOUND_PRODUCT);
+    }
+
+    @DisplayName("해당 제품의 판매자가 아닌 사람이 삭제하려고 할 때 에러가 발생한다")
+    @Test
+    void 다른_판매자의_상품_삭제_테스트_판매자용() throws Exception {
+        // given
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+
+        // when & then
+        assertThatThrownBy(() -> productService.deleteProduct(PRODUCT_ID, 2L))
+                .isInstanceOf(ProductException.class)
+                .hasMessageContaining(ProductErrorMessages.NO_AUTHORIZATION);
     }
 }

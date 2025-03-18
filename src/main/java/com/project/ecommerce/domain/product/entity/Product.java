@@ -83,4 +83,8 @@ public class Product extends BaseEntity {
     public void updatePrice(BigDecimal price) {
         this.price = price;
     }
+
+    public void delete() {
+        this.status = ProductStatus.INACTIVE;
+    }
 }

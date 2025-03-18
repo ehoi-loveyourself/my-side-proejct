@@ -11,7 +11,6 @@ import com.project.ecommerce.domain.product.entity.ProductCategory;
 import com.project.ecommerce.domain.product.entity.ProductStatus;
 import com.project.ecommerce.domain.product.repository.CategoryRepository;
 import com.project.ecommerce.domain.product.repository.ProductRepository;
-import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -78,8 +77,12 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductDto.ProductResponse updateProduct(Long productId, ProductDto.ProductUpdateRequest request, long sellerId) {
         // 수정해야 할 상품 찾기 + 판매자 검증 포함
-        Product product = productRepository.findByIdAndSellerId(productId, sellerId)
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
+
+        if (!product.getSellerId().equals(sellerId)) {
+            throw new ProductException(ProductErrorMessages.NO_AUTHORIZATION, HttpStatus.FORBIDDEN);
+        }
 
         // 상품 수정하기
         if (Objects.nonNull(request.getName())) {
@@ -102,6 +105,19 @@ public class ProductServiceImpl implements ProductService {
 //        productRepository.save(product);
 
         return ProductDto.ProductResponse.of(product);
+    }
+
+    @Override
+    @Transactional
+    public void deleteProduct(Long productId, Long sellerId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
+
+        if (!product.getSellerId().equals(sellerId)) {
+            throw new ProductException(ProductErrorMessages.NO_AUTHORIZATION, HttpStatus.FORBIDDEN);
+        }
+
+        product.delete();
     }
 
     private void addCategoriesToProduct(List<Long> categoryIds, Product product) {
