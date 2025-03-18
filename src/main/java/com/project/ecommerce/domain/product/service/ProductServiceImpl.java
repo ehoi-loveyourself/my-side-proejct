@@ -76,14 +76,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductDto.ProductResponse updateProduct(Long productId, ProductDto.ProductUpdateRequest request, long sellerId) {
-        // 수정해야 할 상품 찾기
-        Product product = productRepository.findById(productId)
+        // 수정해야 할 상품 찾기 + 판매자 검증 포함
+        Product product = productRepository.findByIdAndSellerId(productId, sellerId)
                 .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
-
-        // 해당 판매자의 상품이 맞는지 확인하기
-        if (product.getSellerId() != sellerId) {
-            throw new ProductException(ProductErrorMessages.CANNOT_UPDATE_PRODUCT, HttpStatus.BAD_REQUEST);
-        }
 
         // 상품 수정하기
         if (StringUtils.isNotBlank(request.getName())) {
