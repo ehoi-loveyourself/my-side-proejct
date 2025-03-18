@@ -235,4 +235,33 @@ class ProductServiceImplTest {
         assertThat(response.getStatus()).isEqualTo(ProductStatus.ACTIVE.name());
         assertThat(response.getCategories()).hasSize(2);
     }
+
+    @DisplayName("판매자가 상품을 수정하면 성공적으로 저장된다")
+    @Test
+    void 상품_수정_테스트_판매자용_성공() throws Exception {
+        // given
+        String updatedName = "상품 이름 변경";
+        String updatedDesc = "상품 설명 변경";
+        BigDecimal updatedPrice = BigDecimal.valueOf(2_000_000);
+        ProductDto.ProductUpdateRequest request = ProductDto.ProductUpdateRequest.builder()
+                .name(updatedName)
+                .description(updatedDesc)
+                .price(updatedPrice)
+                .build();
+
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+
+        // when
+        ProductDto.ProductResponse response = productService.updateProduct(PRODUCT_ID, request, SELLER_ID);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getName()).isEqualTo(updatedName);
+        assertThat(response.getDescription()).isEqualTo(updatedDesc);
+        assertThat(response.getPrice()).isEqualTo(updatedPrice);
+    }
+
+    // todo: 없는 상품을 변경하고자 했을 때
+    // todo: 다른 판매자의 상품을 변경하고자 했을 때
+    // todo: 하나만 수정했을 때 나머지는 원본 그대로인지 체크하기
 }
