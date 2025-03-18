@@ -98,4 +98,16 @@ public class ProductDto {
         @NotEmpty(message = "최소 하나의 카테고리는 필수입니다")
         private List<Long> categoryIds;
     }
+
+    @Getter
+    @Builder
+    public static class ProductUpdateRequest {
+
+        private String name;
+
+        private String description;
+
+        @Min(value = 100, message = "가격은 100원 이상이어야 합니다")
+        private BigDecimal price;
+    }
 }
