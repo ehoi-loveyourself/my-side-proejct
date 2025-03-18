@@ -268,7 +268,58 @@ class ProductServiceImplTest {
         verify(productRepository, never()).save(any());
     }
 
-    // todo: 없는 상품을 변경하고자 했을 때
-    // todo: 다른 판매자의 상품을 변경하고자 했을 때
-    // todo: 하나만 수정했을 때 나머지는 원본 그대로인지 체크하기
+    @DisplayName("존재하지 않는 상품을 변경하고자 했을 때는 에러를 던진다")
+    @Test
+    void 상품_수정_테스트_판매자용_실패() throws Exception {
+        // given
+        String updatedName = "상품 이름 변경";
+        String updatedDesc = "상품 설명 변경";
+        BigDecimal updatedPrice = BigDecimal.valueOf(2_000_000);
+        ProductDto.ProductUpdateRequest request = ProductDto.ProductUpdateRequest.builder()
+                .name(updatedName)
+                .description(updatedDesc)
+                .price(updatedPrice)
+                .build();
+
+        when(productRepository.findByIdAndSellerId(PRODUCT_ID, SELLER_ID)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(()-> productService.updateProduct(PRODUCT_ID, request, SELLER_ID))
+                .isInstanceOf(ProductException.class)
+                .hasMessageContaining(ProductErrorMessages.NOT_FOUND_PRODUCT);
+    }
+
+    @DisplayName("판매자가 상품을 일부만 수정하면 나머지는 기존 값을 유지하고 수정 값만 바뀌어야 한다")
+    @Test
+    void 상품_일부_수정_테스트_판매자용_성공() throws Exception {
+        // given
+        String updatedName = "상품 이름 변경";
+        String updatedDesc = "상품 설명 변경";
+        BigDecimal updatedPrice = BigDecimal.valueOf(2_000_000);
+        ProductDto.ProductUpdateRequest request = ProductDto.ProductUpdateRequest.builder()
+                .name(updatedName)
+                .build();
+
+        when(productRepository.findByIdAndSellerId(PRODUCT_ID, SELLER_ID)).thenReturn(Optional.of(product));
+
+        // when
+        ProductDto.ProductResponse response = productService.updateProduct(PRODUCT_ID, request, SELLER_ID);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getName()).isEqualTo(updatedName);
+        assertThat(response.getDescription()).isNotEqualTo(updatedDesc);
+        assertThat(response.getPrice()).isNotEqualTo(updatedPrice);
+
+        assertThat(response.getDescription()).isEqualTo(product.getDescription());
+        assertThat(response.getPrice()).isEqualTo(product.getPrice());
+
+        // 직접 product 객체의 값이 변경되었는지 검증 -> 더티 체킹이 제대로 동작했는지 확인 가능
+        assertThat(product.getName()).isEqualTo(updatedName);
+        assertThat(product.getDescription()).isNotEqualTo(updatedDesc);
+        assertThat(product.getPrice()).isNotEqualTo(updatedPrice);
+
+        // save() 로직을 작성하지 않았는데, save()를 호출하지 않고도 더티 체킹이 동작했는지 확인 가능
+        verify(productRepository, never()).save(any());
+    }
 }
