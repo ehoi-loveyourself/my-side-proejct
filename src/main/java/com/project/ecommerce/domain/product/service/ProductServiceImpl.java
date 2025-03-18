@@ -104,6 +104,19 @@ public class ProductServiceImpl implements ProductService {
         return ProductDto.ProductResponse.of(product);
     }
 
+    @Override
+    @Transactional
+    public void deleteProduct(Long productId, Long sellerId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
+
+        if (!product.getSellerId().equals(sellerId)) {
+            throw new ProductException(ProductErrorMessages.NO_AUTHORIZATION, HttpStatus.FORBIDDEN);
+        }
+
+        product.delete();
+    }
+
     private void addCategoriesToProduct(List<Long> categoryIds, Product product) {
         for (Long categoryId : categoryIds) {
             Category category = categoryRepository.findById(categoryId)
