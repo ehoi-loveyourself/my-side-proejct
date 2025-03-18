@@ -2,6 +2,7 @@ package com.project.ecommerce.domain.product.entity;
 
 import com.project.ecommerce.domain.common.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -69,5 +70,17 @@ public class Product extends BaseEntity {
         this.productCategories.add(productCategory);
 
         productCategory.mapProduct(this);
+    }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updatePrice(BigDecimal price) {
+        this.price = price;
     }
 }

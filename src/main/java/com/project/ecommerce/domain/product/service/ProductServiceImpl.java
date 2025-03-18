@@ -11,6 +11,7 @@ import com.project.ecommerce.domain.product.entity.ProductCategory;
 import com.project.ecommerce.domain.product.entity.ProductStatus;
 import com.project.ecommerce.domain.product.repository.CategoryRepository;
 import com.project.ecommerce.domain.product.repository.ProductRepository;
+import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
@@ -69,6 +72,36 @@ public class ProductServiceImpl implements ProductService {
 
         // 응답 생성
         return ProductDto.ProductResponse.of(savedProduct);
+    }
+
+    @Override
+    @Transactional
+    public ProductDto.ProductResponse updateProduct(Long productId, ProductDto.ProductUpdateRequest request, long sellerId) {
+        // 수정해야 할 상품 찾기 + 판매자 검증 포함
+        Product product = productRepository.findByIdAndSellerId(productId, sellerId)
+                .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
+
+        // 상품 수정하기
+        if (Objects.nonNull(request.getName())) {
+            product.updateName(request.getName());
+        }
+
+        if (Objects.nonNull(request.getDescription())) {
+            product.updateDescription(request.getDescription());
+        }
+
+        if (Objects.nonNull(request.getPrice())) {
+            if (request.getPrice().compareTo(BigDecimal.valueOf(100)) < 0) {
+                throw new ProductException(ProductErrorMessages.INVALID_PRICE, HttpStatus.BAD_REQUEST);
+            }
+
+            product.updatePrice(request.getPrice());
+        }
+
+        // 변경 사항 저장 (명확한 의도를 위해 추가)
+//        productRepository.save(product);
+
+        return ProductDto.ProductResponse.of(product);
     }
 
     private void addCategoriesToProduct(List<Long> categoryIds, Product product) {
