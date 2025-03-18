@@ -98,6 +98,9 @@ public class ProductServiceImpl implements ProductService {
             product.updatePrice(request.getPrice());
         }
 
+        // 변경 사항 저장 (명확한 의도를 위해 추가)
+//        productRepository.save(product);
+
         return ProductDto.ProductResponse.of(product);
     }
 
