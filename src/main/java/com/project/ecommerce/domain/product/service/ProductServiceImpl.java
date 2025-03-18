@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
@@ -81,15 +82,15 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
 
         // 상품 수정하기
-        if (StringUtils.isNotBlank(request.getName())) {
+        if (Objects.nonNull(request.getName())) {
             product.updateName(request.getName());
         }
 
-        if (StringUtils.isNotBlank(request.getDescription())) {
+        if (Objects.nonNull(request.getDescription())) {
             product.updateDescription(request.getDescription());
         }
 
-        if (request.getPrice() != null) {
+        if (Objects.nonNull(request.getPrice())) {
             if (request.getPrice().compareTo(BigDecimal.valueOf(100)) < 0) {
                 throw new ProductException(ProductErrorMessages.INVALID_PRICE, HttpStatus.BAD_REQUEST);
             }
