@@ -61,6 +61,18 @@ public class ProductController {
         return ResponseEntity.ok(createSuccessResponse(response));
     }
 
+    @PutMapping("/{productId}")
+    public ResponseEntity<Map<String, Object>> updateProduct(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long productId,
+            @Valid @RequestBody ProductDto.ProductUpdateRequest request
+    ) {
+        Long sellerId = ((User) userDetails).getId();
+        ProductDto.ProductResponse response = productService.updateProduct(productId, request, sellerId);
+
+        return ResponseEntity.ok(createSuccessResponse(response));
+    }
+
     private Map<String, Object> createSuccessResponse(Object data) {
         Map<String, Object> result = new HashMap<>();
         result.put("status", "success");
