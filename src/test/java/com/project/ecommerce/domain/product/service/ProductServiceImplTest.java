@@ -283,7 +283,7 @@ class ProductServiceImplTest {
         when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(()-> productService.updateProduct(PRODUCT_ID, request, SELLER_ID))
+        assertThatThrownBy(() -> productService.updateProduct(PRODUCT_ID, request, SELLER_ID))
                 .isInstanceOf(ProductException.class)
                 .hasMessageContaining(ProductErrorMessages.NOT_FOUND_PRODUCT);
     }
@@ -363,5 +363,75 @@ class ProductServiceImplTest {
         assertThatThrownBy(() -> productService.deleteProduct(PRODUCT_ID, 2L))
                 .isInstanceOf(ProductException.class)
                 .hasMessageContaining(ProductErrorMessages.NO_AUTHORIZATION);
+    }
+
+    @DisplayName("판매자가 재고를 수정하면 상품의 재고가 변경된다")
+    @Test
+    void 재고_수정_테스트_성공_판매자용() throws Exception {
+        // given
+        ProductDto.StockUpdateRequest request = ProductDto.StockUpdateRequest.builder()
+                .stock(10_000)
+                .build();
+
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+
+        // when
+        ProductDto.ProductResponse response = productService.updateStock(request, PRODUCT_ID, SELLER_ID);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getStock()).isEqualTo(request.getStock());
+
+        verify(productRepository).findById(anyLong());
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @DisplayName("수정하려는 재고 수량이 음수이면 에러가 발생한다")
+    @Test
+    void 재고_수정_음수_테스트_판매자용() throws Exception {
+        // given
+        ProductDto.StockUpdateRequest request = ProductDto.StockUpdateRequest.builder()
+                .stock(-10_000)
+                .build();
+
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+
+        // when & then
+        assertThatThrownBy(() -> productService.updateStock(request, PRODUCT_ID, SELLER_ID))
+                .isInstanceOf(ProductException.class)
+                .hasMessageContaining(ProductErrorMessages.STOCK_MUST_MORE_THAN_ZERO);
+    }
+
+    @DisplayName("다른 판매자의 재고를 수정하면 권한 없음 에러가 뜬다")
+    @Test
+    void 다른_판매자의_상품_수정_테스트_판매자용() throws Exception {
+        // given
+        ProductDto.StockUpdateRequest request = ProductDto.StockUpdateRequest.builder()
+                .stock(10_000)
+                .build();
+
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(product));
+
+        // when & then
+        assertThatThrownBy(() -> productService.updateStock(request, PRODUCT_ID, 2L))
+                .isInstanceOf(ProductException.class)
+                .hasMessageContaining(ProductErrorMessages.NO_AUTHORIZATION);
+    }
+
+    @DisplayName("없는 상품의 재고를 수정하려고 하면 not_found 에러가 뜬다")
+    @Test
+    void 없는_상품_수정_테스트_판매자용() throws Exception {
+        // given
+        ProductDto.StockUpdateRequest request = ProductDto.StockUpdateRequest.builder()
+                .stock(10_000)
+                .build();
+
+        long nonExistingProductId = 99L;
+        when(productRepository.findById(nonExistingProductId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> productService.updateStock(request, nonExistingProductId, SELLER_ID))
+                .isInstanceOf(ProductException.class)
+                .hasMessageContaining(ProductErrorMessages.NOT_FOUND_PRODUCT);
     }
 }
