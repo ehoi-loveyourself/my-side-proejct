@@ -87,4 +87,9 @@ public class Product extends BaseEntity {
     public void delete() {
         this.status = ProductStatus.INACTIVE;
     }
+
+    public Product updateStock(int stock) {
+        this.stock = stock;
+        return this;
+    }
 }

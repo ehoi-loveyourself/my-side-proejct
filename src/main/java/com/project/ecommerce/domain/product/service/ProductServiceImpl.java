@@ -51,7 +51,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductDto.ProductResponse registerProduct(ProductDto.ProductRegisterRequest request, long sellerId) {
+    public ProductDto.ProductResponse registerProduct(ProductDto.ProductRegisterRequest request, Long sellerId) {
         // 상품 생성
         Product newProduct = Product.builder()
                 .name(request.getName())
@@ -75,11 +75,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductDto.ProductResponse updateProduct(Long productId, ProductDto.ProductUpdateRequest request, long sellerId) {
-        // 수정해야 할 상품 찾기 + 판매자 검증 포함
+    public ProductDto.ProductResponse updateProduct(Long productId, ProductDto.ProductUpdateRequest request, Long sellerId) {
+        // 수정해야 할 상품 찾기
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
 
+        // 판매자 검증 포함
         if (!product.getSellerId().equals(sellerId)) {
             throw new ProductException(ProductErrorMessages.NO_AUTHORIZATION, HttpStatus.FORBIDDEN);
         }
@@ -118,6 +119,31 @@ public class ProductServiceImpl implements ProductService {
         }
 
         product.delete();
+    }
+
+    @Override
+    @Transactional
+    public ProductDto.ProductResponse updateStock(ProductDto.StockUpdateRequest request, Long productId, Long sellerId) {
+        // 수정해야 할 상품 찾기
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
+
+        // 판매자 검증 포함
+        if (!product.getSellerId().equals(sellerId)) {
+            throw new ProductException(ProductErrorMessages.NO_AUTHORIZATION, HttpStatus.FORBIDDEN);
+        }
+
+        // 재고 수정하기
+        if (request.getStock() < 0) {
+            throw new ProductException(ProductErrorMessages.STOCK_MUST_MORE_THAN_ZERO, HttpStatus.BAD_REQUEST);
+        }
+
+        if (request.getStock() == product.getStock()) {
+            throw new ProductException(ProductErrorMessages.CANNOT_UPDATE_PRODUCT_WITH_SAME_STOCK, HttpStatus.BAD_REQUEST);
+        }
+        Product updatedStock = product.updateStock(request.getStock());
+
+        return ProductDto.ProductResponse.of(updatedStock);
     }
 
     private void addCategoriesToProduct(List<Long> categoryIds, Product product) {
