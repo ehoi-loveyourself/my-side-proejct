@@ -120,6 +120,31 @@ public class ProductServiceImpl implements ProductService {
         product.delete();
     }
 
+    @Override
+    @Transactional
+    public ProductDto.ProductResponse updateStock(ProductDto.StockUpdateRequest request, Long productId, Long sellerId) {
+        // 수정해야 할 상품 찾기
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
+
+        // 판매자 검증 포함
+        if (!product.getSellerId().equals(sellerId)) {
+            throw new ProductException(ProductErrorMessages.NO_AUTHORIZATION, HttpStatus.FORBIDDEN);
+        }
+
+        // 재고 수정하기
+        if (request.getStock() < 0) {
+            throw new ProductException(ProductErrorMessages.STOCK_MUST_MORE_THAN_ZERO, HttpStatus.BAD_REQUEST);
+        }
+
+        if (request.getStock() == product.getStock()) {
+            throw new ProductException(ProductErrorMessages.CANNOT_UPDATE_PRODUCT_WITH_SAME_STOCK, HttpStatus.BAD_REQUEST);
+        }
+        Product updatedStock = product.updateStock(request.getStock());
+
+        return ProductDto.ProductResponse.of(updatedStock);
+    }
+
     private void addCategoriesToProduct(List<Long> categoryIds, Product product) {
         for (Long categoryId : categoryIds) {
             Category category = categoryRepository.findById(categoryId)

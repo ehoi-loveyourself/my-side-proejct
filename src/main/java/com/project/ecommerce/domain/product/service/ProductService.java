@@ -17,4 +17,6 @@ public interface ProductService {
     ProductDto.ProductResponse updateProduct(Long productId, ProductDto.ProductUpdateRequest request, long sellerId);
 
     void deleteProduct(Long productId, Long sellerId);
+
+    ProductDto.ProductResponse updateStock(ProductDto.StockUpdateRequest request, Long productId, Long sellerId);
 }
