@@ -61,7 +61,7 @@ public class ProductController {
         return ResponseEntity.ok(createSuccessResponse(response));
     }
 
-    @PutMapping("/{productId}")
+    @PatchMapping("/{productId}")
     public ResponseEntity<Map<String, Object>> updateProduct(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long productId,
@@ -69,6 +69,18 @@ public class ProductController {
     ) {
         Long sellerId = ((User) userDetails).getId();
         ProductDto.ProductResponse response = productService.updateProduct(productId, request, sellerId);
+
+        return ResponseEntity.ok(createSuccessResponse(response));
+    }
+
+    @PatchMapping("/{productId}/stock")
+    public ResponseEntity<Map<String, Object>> updateStock(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long productId,
+            @Valid @RequestBody ProductDto.StockUpdateRequest request
+    ) {
+        Long sellerId = ((User) userDetails).getId();
+        ProductDto.ProductResponse response = productService.updateStock(request, productId, sellerId);
 
         return ResponseEntity.ok(createSuccessResponse(response));
     }
