@@ -1,5 +1,6 @@
 package com.project.ecommerce.domain.product.dto;
 
+import com.project.ecommerce.common.exception.ProductErrorMessages;
 import com.project.ecommerce.domain.product.entity.Product;
 import com.project.ecommerce.domain.product.entity.ProductCategory;
 import jakarta.validation.constraints.Min;
@@ -90,7 +91,7 @@ public class ProductDto {
         private BigDecimal price;
 
         @NotNull(message = "재고는 필수입니다")
-        @Min(value = 0, message = "재고 수량은 0 이상이어야 합니다")
+        @Min(value = 0, message = ProductErrorMessages.STOCK_MUST_MORE_THAN_ZERO)
         private int stock;
 
         private List<String> imageUrls;
@@ -109,5 +110,13 @@ public class ProductDto {
 
         @Min(value = 100, message = "가격은 100원 이상이어야 합니다")
         private BigDecimal price;
+    }
+
+    @Builder
+    @Getter
+    public static class StockUpdateRequest {
+
+        @Min(value = 0, message = ProductErrorMessages.STOCK_MUST_MORE_THAN_ZERO)
+        private int stock;
     }
 }
