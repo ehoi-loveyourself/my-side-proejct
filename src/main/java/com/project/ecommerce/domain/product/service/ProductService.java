@@ -12,9 +12,9 @@ public interface ProductService {
 
     Page<ProductDto.ProductSimpleResponse> searchProduct(String keyword, Pageable pageable);
 
-    ProductDto.ProductResponse registerProduct(ProductDto.ProductRegisterRequest request, long sellerId);
+    ProductDto.ProductResponse registerProduct(ProductDto.ProductRegisterRequest request, Long sellerId);
 
-    ProductDto.ProductResponse updateProduct(Long productId, ProductDto.ProductUpdateRequest request, long sellerId);
+    ProductDto.ProductResponse updateProduct(Long productId, ProductDto.ProductUpdateRequest request, Long sellerId);
 
     void deleteProduct(Long productId, Long sellerId);
 
