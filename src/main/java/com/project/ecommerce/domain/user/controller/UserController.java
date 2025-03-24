@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.project.ecommerce.common.utils.ResponseUtil.createSuccessResponse;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/users")
@@ -57,13 +59,5 @@ public class UserController {
         message.put("message", "비밀번호가 성공적으로 변경되었습니다.");
 
         return ResponseEntity.ok(message);
-    }
-
-    private Map<String, Object> createSuccessResponse(Object data) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("status", "success");
-        result.put("data", data);
-
-        return result;
     }
 }
