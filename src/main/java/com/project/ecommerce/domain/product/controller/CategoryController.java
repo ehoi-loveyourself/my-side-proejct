@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import static com.project.ecommerce.common.utils.ResponseUtil.createSuccessResponse;
 
 @RequiredArgsConstructor
 @RestController
@@ -29,13 +30,5 @@ public class CategoryController {
         Page<CategoryDto.CategoryResponse> response = categoryService.getCategoryList(pageable);
 
         return ResponseEntity.ok(createSuccessResponse(response));
-    }
-
-    private Map<String, Object> createSuccessResponse(Object data) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("status", "success");
-        result.put("data", data);
-
-        return result;
     }
 }

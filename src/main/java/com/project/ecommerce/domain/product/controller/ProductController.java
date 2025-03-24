@@ -14,8 +14,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import static com.project.ecommerce.common.utils.ResponseUtil.createSuccessResponse;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/products")
@@ -83,13 +84,5 @@ public class ProductController {
         ProductDto.ProductResponse response = productService.updateStock(request, productId, sellerId);
 
         return ResponseEntity.ok(createSuccessResponse(response));
-    }
-
-    private Map<String, Object> createSuccessResponse(Object data) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("status", "success");
-        result.put("data", data);
-
-        return result;
     }
 }
