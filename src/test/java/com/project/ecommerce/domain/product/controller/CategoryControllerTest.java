@@ -1,6 +1,7 @@
 package com.project.ecommerce.domain.product.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.ecommerce.common.utils.JwtTokenProvider;
 import com.project.ecommerce.domain.product.dto.CategoryDto;
 import com.project.ecommerce.domain.product.service.CategoryService;
 import com.project.ecommerce.domain.user.dto.UserDto;
@@ -24,8 +25,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -41,14 +45,17 @@ class CategoryControllerTest {
     @MockitoBean
     private CategoryService categoryService;
 
-    @Autowired
+    @MockitoBean
     private UserRepository userRepository;
 
     @Autowired
     ObjectMapper objectMapper;
 
-    @Autowired
+    @MockitoBean
     private PasswordEncoder passwordEncoder;
+
+    @MockitoBean
+    private JwtTokenProvider jwtTokenProvider;
 
     private User testUser;
     private String token;
@@ -56,13 +63,17 @@ class CategoryControllerTest {
     @BeforeEach
     void setUp() throws Exception {
         // 테스트 사용자 생성
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword123");
+
         testUser = User.builder()
                 .email("test@example.com")
                 .password(passwordEncoder.encode("password123"))
                 .name("test user")
                 .role(Role.CUSTOMER)
                 .build();
-        userRepository.save(testUser);
+
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+//        userRepository.save(testUser);
 
         // 로그인하여 토큰 획득
         UserDto.LoginRequest loginRequest = UserDto.LoginRequest.builder()
@@ -71,6 +82,7 @@ class CategoryControllerTest {
                 .build();
 
         String response = mockMvc.perform(post("/api/v1/users/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
