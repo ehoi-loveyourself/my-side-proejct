@@ -46,7 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         // 카테고리명 중복 검사
         if (categoryRepository.existsByName(request.getName())) {
-            throw new CategoryException(UserErrorMessages.ALREADY_EXIST, HttpStatus.BAD_REQUEST);
+            throw new CategoryException(CategoryErrorMessages.ALREADY_EXIST, HttpStatus.BAD_REQUEST);
         }
 
         // todo: 그때 다빈님이 엔티티 만드는 것과 관련해서, 빌더로 할지, create 메서드를 static으로 할지 알려준 게 있었는데, 까먹었다.
