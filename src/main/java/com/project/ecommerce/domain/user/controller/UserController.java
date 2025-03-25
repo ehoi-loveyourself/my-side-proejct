@@ -4,6 +4,7 @@ import com.project.ecommerce.domain.user.dto.UserDto;
 import com.project.ecommerce.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,7 +33,9 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody UserDto.LoginRequest request) {
         UserDto.TokenResponse response = userService.login(request);
 
-        return ResponseEntity.ok(createSuccessResponse(response));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + response.getToken())
+                .build();
     }
 
     @GetMapping("/me")
