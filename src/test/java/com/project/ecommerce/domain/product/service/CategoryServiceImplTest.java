@@ -146,7 +146,7 @@ class CategoryServiceImplTest {
         when(userRepository.findById(seller.getId())).thenReturn(Optional.of(seller));
 
         // when
-        CategoryDto.CategoryResponse response = categoryService.createCategory(request, seller.getId());
+        CategoryDto.CategoryResponse response = categoryService.registerCategory(request, seller.getId());
 
         // then
         assertThat(response).isNotNull();

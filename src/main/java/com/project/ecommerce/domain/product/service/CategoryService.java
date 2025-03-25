@@ -10,5 +10,5 @@ public interface CategoryService {
 
     CategoryDto.CategoryResponse getCategory(Long categoryId);
 
-    CategoryDto.CategoryResponse createCategory(CategoryDto.CategoryRegisterRequest request, Long sellerId);
+    CategoryDto.CategoryResponse registerCategory(CategoryDto.CategoryRegisterRequest request, Long sellerId);
 }

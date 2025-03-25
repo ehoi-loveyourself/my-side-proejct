@@ -37,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto.CategoryResponse createCategory(CategoryDto.CategoryRegisterRequest request, Long sellerId) {
+    public CategoryDto.CategoryResponse registerCategory(CategoryDto.CategoryRegisterRequest request, Long sellerId) {
         // 판매자인지 검증
         User user = userRepository.findById(sellerId)
                 .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
