@@ -5,6 +5,9 @@ import com.project.ecommerce.common.exception.CategoryException;
 import com.project.ecommerce.domain.product.dto.CategoryDto;
 import com.project.ecommerce.domain.product.entity.Category;
 import com.project.ecommerce.domain.product.repository.CategoryRepository;
+import com.project.ecommerce.domain.user.entity.Role;
+import com.project.ecommerce.domain.user.entity.User;
+import com.project.ecommerce.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,8 +22,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceImplTest {
@@ -28,11 +30,16 @@ class CategoryServiceImplTest {
     @Mock
     private CategoryRepository categoryRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private CategoryServiceImpl categoryService;
 
     private Category category1;
     private Category category2;
+    private User seller;
+    private User user;
 
     @BeforeEach
     void setUp() {
@@ -45,6 +52,22 @@ class CategoryServiceImplTest {
                 .name("카테고리2")
                 .description("카테고리2 설명")
                 .build();
+
+        // 판매자 생성
+        seller = User.builder()
+                .name("판매자")
+                .email("seller@example.com")
+                .role(Role.SELLER)
+                .build();
+        setId(seller, 1L);
+
+        // 일반 유저 생성
+        user = User.builder()
+                .name("일반 유저")
+                .email("user@example.com")
+                .role(Role.CUSTOMER)
+                .build();
+        setId(user, 99L);
     }
 
     @DisplayName("카테고리 목록 조회를 성공한다.")
@@ -102,6 +125,56 @@ class CategoryServiceImplTest {
                 .hasMessageContaining(CategoryErrorMessages.NOT_FOUND_CATEGORY);
 
         verify(categoryRepository).findById(categoryId);
+    }
+
+    @DisplayName("카테고리 생성을 성공한다.")
+    @Test
+    void 카테고리_생성_판매자용_성공() {
+        // given
+        CategoryDto.CategoryRegisterRequest request = CategoryDto.CategoryRegisterRequest.builder()
+                .name("가방")
+                .description("가방 카테고리입니다.")
+                .build(); // 최상위 카테고리
+
+        Category savedCategory = Category.builder()
+                .name("가방")
+                .description("가방 카테고리입니다.")
+                .build(); // 최상위 카테고리
+        setId(savedCategory, 1L);
+
+        when(categoryRepository.save(any(Category.class))).thenReturn(savedCategory);
+        when(userRepository.findById(seller.getId())).thenReturn(Optional.of(seller));
+
+        // when
+        CategoryDto.CategoryResponse response = categoryService.createCategory(request, seller.getId());
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getName()).isEqualTo(savedCategory.getName());
+        assertThat(response.getDescription()).isEqualTo(savedCategory.getDescription());
+
+        verify(categoryRepository).existsByName(savedCategory.getName());
+        verify(categoryRepository).save(any(Category.class));
+    }
+
+    @DisplayName("일반 고객이 카테고리를 생성하려고 하면 실패한다.")
+    @Test
+    void 권한_카테고리_생성_판매자용_실패() {
+        // given
+
+        // when
+
+        // then
+    }
+
+    @DisplayName("이미 존재하는 카테고리를 생성하려고 하면 실패한다.")
+    @Test
+    void 중복_카테고리_생성_판매자용_실패() {
+        // given
+
+        // when
+
+        // then
     }
 
     private void setId(Object entity, Long id) {

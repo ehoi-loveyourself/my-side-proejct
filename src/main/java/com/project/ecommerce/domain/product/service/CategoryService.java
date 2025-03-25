@@ -9,4 +9,6 @@ public interface CategoryService {
     Page<CategoryDto.CategoryResponse> getCategoryList(Pageable pageable);
 
     CategoryDto.CategoryResponse getCategory(Long categoryId);
+
+    CategoryDto.CategoryResponse createCategory(CategoryDto.CategoryRegisterRequest request, Long sellerId);
 }
