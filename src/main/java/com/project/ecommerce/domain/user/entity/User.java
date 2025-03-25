@@ -1,19 +1,20 @@
 package com.project.ecommerce.domain.user.entity;
 
+import com.project.ecommerce.common.exception.UserErrorMessages;
+import com.project.ecommerce.common.exception.UserException;
 import com.project.ecommerce.domain.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 @Getter
 @Entity
@@ -54,6 +55,16 @@ public class User extends BaseEntity implements UserDetails {
 
     public void updateName(String newName) {
         this.name = newName;
+    }
+
+    public boolean isSeller() {
+        return this.role == Role.SELLER;
+    }
+
+    public void checkSeller() {
+        if (!isSeller()) {
+            throw new UserException(UserErrorMessages.ONLY_FOR_SELLER, HttpStatus.UNAUTHORIZED);
+        }
     }
 
     //==UserDetails 구현 ==//
