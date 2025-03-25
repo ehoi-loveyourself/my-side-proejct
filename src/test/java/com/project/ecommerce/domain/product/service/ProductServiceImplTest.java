@@ -152,16 +152,6 @@ class ProductServiceImplTest {
         verify(productRepository).findById(nonExistingProductId);
     }
 
-    private void setId(Object entity, Long id) {
-        try {
-            java.lang.reflect.Field idField = entity.getClass().getSuperclass().getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(entity, id);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     @DisplayName("상품명 키워드로 검색 시 해당 키워드를 포함하는 활성화된 상품만 조회된다")
     @Test
     void 상품_검색_테스트_성송() throws Exception {
@@ -433,5 +423,15 @@ class ProductServiceImplTest {
         assertThatThrownBy(() -> productService.updateStock(request, nonExistingProductId, SELLER_ID))
                 .isInstanceOf(ProductException.class)
                 .hasMessageContaining(ProductErrorMessages.NOT_FOUND_PRODUCT);
+    }
+
+    private void setId(Object entity, Long id) {
+        try {
+            java.lang.reflect.Field idField = entity.getClass().getSuperclass().getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(entity, id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
