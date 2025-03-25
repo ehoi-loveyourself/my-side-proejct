@@ -1,6 +1,7 @@
 package com.project.ecommerce.domain.product.dto;
 
 import com.project.ecommerce.domain.product.entity.Category;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -22,5 +23,17 @@ public class CategoryDto {
                     .parentCategoryId(category.getId())
                     .build();
         }
+    }
+
+    @Getter
+    @Builder
+    public static class CategoryRegisterRequest {
+
+        @NotBlank(message = "카테고리명은 필수입니다.")
+        private String name;
+
+        private String description;
+
+        private Long parentCategoryId; // null이면 최상위 카테고리
     }
 }

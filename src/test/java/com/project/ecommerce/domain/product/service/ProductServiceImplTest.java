@@ -233,9 +233,10 @@ class ProductServiceImplTest {
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category1));
         when(categoryRepository.findById(2L)).thenReturn(Optional.of(category2));
         when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
+        when(userRepository.findById(seller.getId())).thenReturn(Optional.of(seller));
 
         // when
-        ProductDto.ProductResponse response = productService.registerProduct(request, SELLER_ID);
+        ProductDto.ProductResponse response = productService.registerProduct(request, seller.getId());
 
         // then
         assertThat(response).isNotNull();
