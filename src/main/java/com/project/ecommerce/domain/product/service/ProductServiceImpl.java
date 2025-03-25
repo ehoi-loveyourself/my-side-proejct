@@ -53,13 +53,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductDto.ProductResponse registerProduct(ProductDto.ProductRegisterRequest request, Long sellerId) {
-        // 판매자인지에 대한 검증
+        // 판매자인지 검증
         User user = userRepository.findById(sellerId)
                 .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
 
-        if (user.getRole() != Role.SELLER) {
-            throw new UserException(UserErrorMessages.ONLY_FOR_SELLER, HttpStatus.UNAUTHORIZED);
-        }
+        user.checkSeller();
 
         // 상품 생성
         Product newProduct = Product.builder()
