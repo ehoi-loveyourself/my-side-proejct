@@ -2,6 +2,8 @@ package com.project.ecommerce.domain.product.service;
 
 import com.project.ecommerce.common.exception.CategoryErrorMessages;
 import com.project.ecommerce.common.exception.CategoryException;
+import com.project.ecommerce.common.exception.UserErrorMessages;
+import com.project.ecommerce.common.exception.UserException;
 import com.project.ecommerce.domain.product.dto.CategoryDto;
 import com.project.ecommerce.domain.product.entity.Category;
 import com.project.ecommerce.domain.product.repository.CategoryRepository;
@@ -161,20 +163,40 @@ class CategoryServiceImplTest {
     @Test
     void 권한_카테고리_생성_판매자용_실패() {
         // given
+        CategoryDto.CategoryRegisterRequest request = CategoryDto.CategoryRegisterRequest.builder()
+                .name("가방")
+                .description("가방 카테고리입니다.")
+                .build(); // 최상위 카테고리
 
-        // when
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        // then
+        // when & then
+        assertThatThrownBy(() -> categoryService.registerCategory(request, user.getId()))
+                .isInstanceOf(UserException.class)
+                .hasMessageContaining(UserErrorMessages.ONLY_FOR_SELLER);
     }
 
     @DisplayName("이미 존재하는 카테고리를 생성하려고 하면 실패한다.")
     @Test
     void 중복_카테고리_생성_판매자용_실패() {
         // given
+        Category existingCategory = Category.builder()
+                .name("가방")
+                .description("가방 카테고리입니다.")
+                .build();
 
-        // when
+        CategoryDto.CategoryRegisterRequest request = CategoryDto.CategoryRegisterRequest.builder()
+                .name("가방")
+                .description("가방 카테고리입니다.")
+                .build(); // 최상위 카테고리
 
-        // then
+        when(userRepository.findById(seller.getId())).thenReturn(Optional.of(seller));
+        when(categoryRepository.existsByName(request.getName())).thenReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> categoryService.registerCategory(request, seller.getId()))
+                .isInstanceOf(CategoryException.class)
+                .hasMessageContaining(CategoryErrorMessages.ALREADY_EXIST);
     }
 
     private void setId(Object entity, Long id) {
