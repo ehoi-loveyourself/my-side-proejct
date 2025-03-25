@@ -2,16 +2,17 @@ package com.project.ecommerce.domain.product.controller;
 
 import com.project.ecommerce.domain.product.dto.CategoryDto;
 import com.project.ecommerce.domain.product.service.CategoryService;
+import com.project.ecommerce.domain.user.entity.User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -36,6 +37,17 @@ public class CategoryController {
     @GetMapping("/{categoryId}")
     public ResponseEntity<Map<String, Object>> getCategory(@PathVariable Long categoryId) {
         CategoryDto.CategoryResponse response = categoryService.getCategory(categoryId);
+
+        return ResponseEntity.ok(createSuccessResponse(response));
+    }
+
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> registerCategory(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody CategoryDto.CategoryRegisterRequest request
+    ) {
+        Long sellerId = ((User) userDetails).getId();
+        CategoryDto.CategoryResponse response = categoryService.registerCategory(request, sellerId);
 
         return ResponseEntity.ok(createSuccessResponse(response));
     }
