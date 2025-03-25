@@ -1,9 +1,6 @@
 package com.project.ecommerce.domain.product.service;
 
-import com.project.ecommerce.common.exception.CategoryErrorMessages;
-import com.project.ecommerce.common.exception.CategoryException;
-import com.project.ecommerce.common.exception.ProductErrorMessages;
-import com.project.ecommerce.common.exception.ProductException;
+import com.project.ecommerce.common.exception.*;
 import com.project.ecommerce.domain.product.dto.ProductDto;
 import com.project.ecommerce.domain.product.entity.Category;
 import com.project.ecommerce.domain.product.entity.Product;
@@ -11,6 +8,9 @@ import com.project.ecommerce.domain.product.entity.ProductCategory;
 import com.project.ecommerce.domain.product.entity.ProductStatus;
 import com.project.ecommerce.domain.product.repository.CategoryRepository;
 import com.project.ecommerce.domain.product.repository.ProductRepository;
+import com.project.ecommerce.domain.user.entity.Role;
+import com.project.ecommerce.domain.user.entity.User;
+import com.project.ecommerce.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Page<ProductDto.ProductSimpleResponse> getProductList(Pageable pageable) {
@@ -52,6 +53,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductDto.ProductResponse registerProduct(ProductDto.ProductRegisterRequest request, Long sellerId) {
+        // 판매자인지에 대한 검증
+        User user = userRepository.findById(sellerId)
+                .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
+
+        if (user.getRole() != Role.SELLER) {
+            throw new UserException(UserErrorMessages.ONLY_FOR_SELLER, HttpStatus.UNAUTHORIZED);
+        }
+
         // 상품 생성
         Product newProduct = Product.builder()
                 .name(request.getName())

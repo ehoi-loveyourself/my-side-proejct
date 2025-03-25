@@ -2,6 +2,8 @@ package com.project.ecommerce.domain.product.service;
 
 import com.project.ecommerce.common.exception.ProductErrorMessages;
 import com.project.ecommerce.common.exception.ProductException;
+import com.project.ecommerce.common.exception.UserErrorMessages;
+import com.project.ecommerce.common.exception.UserException;
 import com.project.ecommerce.domain.product.dto.ProductDto;
 import com.project.ecommerce.domain.product.entity.Category;
 import com.project.ecommerce.domain.product.entity.Product;
@@ -9,6 +11,9 @@ import com.project.ecommerce.domain.product.entity.ProductCategory;
 import com.project.ecommerce.domain.product.entity.ProductStatus;
 import com.project.ecommerce.domain.product.repository.CategoryRepository;
 import com.project.ecommerce.domain.product.repository.ProductRepository;
+import com.project.ecommerce.domain.user.entity.Role;
+import com.project.ecommerce.domain.user.entity.User;
+import com.project.ecommerce.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,9 +44,14 @@ class ProductServiceImplTest {
     @Mock
     private CategoryRepository categoryRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private ProductServiceImpl productService;
 
+    private User seller;
+    private User user;
     private Product product;
     private Category category1;
     private Category category2;
@@ -87,6 +97,22 @@ class ProductServiceImplTest {
         // product 의 getCategories 메소드가 카테고리 목록을 반환하도록 설정
         List<ProductCategory> productCategories = Arrays.asList(productCategory1, productCategory2);
         product.setProductCategoriesForTest(productCategories);
+
+        // 판매자 생성
+        seller = User.builder()
+                .name("판매자")
+                .email("seller@example.com")
+                .role(Role.SELLER)
+                .build();
+        setId(seller, 1L);
+
+        // 일반 유저 생성
+        user = User.builder()
+                .name("일반 유저")
+                .email("user@example.com")
+                .role(Role.CUSTOMER)
+                .build();
+        setId(user, 99L);
     }
 
     @DisplayName("상품 목록 조회 시 활성화된 상품만 조회된다.")
@@ -150,16 +176,6 @@ class ProductServiceImplTest {
                 .hasMessageContaining(ProductErrorMessages.NOT_FOUND_PRODUCT);
 
         verify(productRepository).findById(nonExistingProductId);
-    }
-
-    private void setId(Object entity, Long id) {
-        try {
-            java.lang.reflect.Field idField = entity.getClass().getSuperclass().getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(entity, id);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @DisplayName("상품명 키워드로 검색 시 해당 키워드를 포함하는 활성화된 상품만 조회된다")
@@ -232,6 +248,28 @@ class ProductServiceImplTest {
         assertThat(response.getImageUrls()).containsExactly("image1.jpg", "image2.png");
         assertThat(response.getStatus()).isEqualTo(ProductStatus.ACTIVE.name());
         assertThat(response.getCategories()).hasSize(2);
+    }
+
+    @DisplayName("판매자가 규칙에 맞게 상품을 등록하지 않으면 실패한다")
+    @Test
+    void 상품_등록_테스트_판매자용_실패() throws Exception {
+        // given
+        List<Long> categoryIds = Arrays.asList(1L, 2L);
+        ProductDto.ProductRegisterRequest request = ProductDto.ProductRegisterRequest.builder()
+                .name("맥북 에어")
+                .description("맥북 에어 15인치")
+                .price(BigDecimal.valueOf(2_000_000))
+                .stock(10)
+                .imageUrls(Arrays.asList("image1.jpg", "image2.png"))
+                .categoryIds(categoryIds)
+                .build();
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        // when & then
+        assertThatThrownBy(() -> productService.registerProduct(request, user.getId()))
+                .isInstanceOf(UserException.class)
+                .hasMessageContaining(UserErrorMessages.ONLY_FOR_SELLER);
     }
 
     @DisplayName("판매자가 상품을 수정하면 성공적으로 저장된다")
@@ -433,5 +471,15 @@ class ProductServiceImplTest {
         assertThatThrownBy(() -> productService.updateStock(request, nonExistingProductId, SELLER_ID))
                 .isInstanceOf(ProductException.class)
                 .hasMessageContaining(ProductErrorMessages.NOT_FOUND_PRODUCT);
+    }
+
+    private void setId(Object entity, Long id) {
+        try {
+            java.lang.reflect.Field idField = entity.getClass().getSuperclass().getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(entity, id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
