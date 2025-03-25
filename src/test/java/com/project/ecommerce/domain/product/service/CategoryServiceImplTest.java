@@ -1,5 +1,7 @@
 package com.project.ecommerce.domain.product.service;
 
+import com.project.ecommerce.common.exception.CategoryErrorMessages;
+import com.project.ecommerce.common.exception.CategoryException;
 import com.project.ecommerce.domain.product.dto.CategoryDto;
 import com.project.ecommerce.domain.product.entity.Category;
 import com.project.ecommerce.domain.product.repository.CategoryRepository;
@@ -13,8 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,5 +66,51 @@ class CategoryServiceImplTest {
         assertThat(responses.getContent()).hasSize(2);
 
         verify(categoryRepository).findAll(pageable);
+    }
+
+    @DisplayName("카테고리 상세 조회를 성공한다.")
+    @Test
+    void 카테고리_상세_조회_성공() {
+        // given
+        Long categoryId = 1L;
+        setId(category1, categoryId);
+
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category1));
+
+        // when
+        CategoryDto.CategoryResponse response = categoryService.getCategory(categoryId);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getName()).isEqualTo(category1.getName());
+        assertThat(response.getDescription()).isEqualTo(category1.getDescription());
+
+        verify(categoryRepository).findById(categoryId);
+    }
+
+    @DisplayName("존재하지 않는 카테고리 상세 조회를 요청하면 실패한다.")
+    @Test
+    void 존재하지_않는_카테고리_상세_조회_실패() {
+        // given
+        Long categoryId = 999L;
+
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> categoryService.getCategory(categoryId))
+                .isInstanceOf(CategoryException.class)
+                .hasMessageContaining(CategoryErrorMessages.NOT_FOUND_CATEGORY);
+
+        verify(categoryRepository).findById(categoryId);
+    }
+
+    private void setId(Object entity, Long id) {
+        try {
+            java.lang.reflect.Field idField = entity.getClass().getSuperclass().getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(entity, id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
