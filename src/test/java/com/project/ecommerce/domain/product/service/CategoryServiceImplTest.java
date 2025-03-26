@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,11 +50,13 @@ class CategoryServiceImplTest {
                 .name("카테고리1")
                 .description("카테고리1 설명")
                 .build();
+        ReflectionTestUtils.setField(category1, "id", 1L);
 
         category2 = Category.builder()
                 .name("카테고리2")
                 .description("카테고리2 설명")
                 .build();
+        ReflectionTestUtils.setField(category2, "id", 2L);
 
         // 판매자 생성
         seller = User.builder()
@@ -61,7 +64,7 @@ class CategoryServiceImplTest {
                 .email("seller@example.com")
                 .role(Role.SELLER)
                 .build();
-        setId(seller, 1L);
+        ReflectionTestUtils.setField(seller, "id", 1L);
 
         // 일반 유저 생성
         user = User.builder()
@@ -69,7 +72,7 @@ class CategoryServiceImplTest {
                 .email("user@example.com")
                 .role(Role.CUSTOMER)
                 .build();
-        setId(user, 99L);
+        ReflectionTestUtils.setField(user, "id", 99L);
     }
 
     @DisplayName("카테고리 목록 조회를 성공한다.")
@@ -98,7 +101,6 @@ class CategoryServiceImplTest {
     void 카테고리_상세_조회_성공() {
         // given
         Long categoryId = 1L;
-        setId(category1, categoryId);
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category1));
 
@@ -142,7 +144,7 @@ class CategoryServiceImplTest {
                 .name("가방")
                 .description("가방 카테고리입니다.")
                 .build(); // 최상위 카테고리
-        setId(savedCategory, 1L);
+        ReflectionTestUtils.setField(savedCategory, "id", 1L);
 
         when(categoryRepository.save(any(Category.class))).thenReturn(savedCategory);
         when(userRepository.findById(seller.getId())).thenReturn(Optional.of(seller));
@@ -161,7 +163,7 @@ class CategoryServiceImplTest {
 
     @DisplayName("일반 고객이 카테고리를 생성하려고 하면 실패한다.")
     @Test
-    void 권한_카테고리_생성_판매자용_실패() {
+    void 카테고리_생성_판매자용_실패_권한문제() {
         // given
         CategoryDto.CategoryRegisterRequest request = CategoryDto.CategoryRegisterRequest.builder()
                 .name("가방")
@@ -178,7 +180,7 @@ class CategoryServiceImplTest {
 
     @DisplayName("이미 존재하는 카테고리를 생성하려고 하면 실패한다.")
     @Test
-    void 중복_카테고리_생성_판매자용_실패() {
+    void 카테고리_생성_판매자용_실패_이름중복() {
         // given
         Category existingCategory = Category.builder()
                 .name("가방")
@@ -199,13 +201,61 @@ class CategoryServiceImplTest {
                 .hasMessageContaining(CategoryErrorMessages.ALREADY_EXIST);
     }
 
-    private void setId(Object entity, Long id) {
-        try {
-            java.lang.reflect.Field idField = entity.getClass().getSuperclass().getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(entity, id);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    @DisplayName("판매자가 카테고리를 수정시 성공한다.")
+    @Test
+    void 카테고리_수정_판매자용_성공() {
+        // given
+        CategoryDto.CategoryUpdateRequest request = CategoryDto.CategoryUpdateRequest.builder()
+                .name("수정된 카테고리 이름")
+                .description("수정된 카테고리 설명")
+                .build();
+
+        when(userRepository.findById(seller.getId())).thenReturn(Optional.of(seller));
+        when(categoryRepository.findById(category1.getId())).thenReturn(Optional.of(category1));
+
+        // when
+        CategoryDto.CategoryResponse response = categoryService.updateCategory(request, seller.getId(), category1.getId());
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getName()).isEqualTo(request.getName());
+        assertThat(response.getDescription()).isEqualTo(request.getDescription());
+    }
+
+    @DisplayName("일반 고객이 카테고리를 수정시실패한다.")
+    @Test
+    void 카테고리_수정_판매자용_실패_권한문제() {
+        // given
+        CategoryDto.CategoryUpdateRequest request = CategoryDto.CategoryUpdateRequest.builder()
+                .name("수정된 카테고리 이름")
+                .description("수정된 카테고리 설명")
+                .build();
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        // when & then
+        assertThatThrownBy(() -> categoryService.updateCategory(request, user.getId(), category1.getId()))
+                .isInstanceOf(UserException.class)
+                .hasMessageContaining(UserErrorMessages.ONLY_FOR_SELLER);
+    }
+
+    @DisplayName("카테고리를 수정시 자기자신을 상위카테고리로 지정시 실패한다.")
+    @Test
+    void 카테고리_수정_판매자용_실패_본인카테고리() {
+        // given
+        CategoryDto.CategoryUpdateRequest request = CategoryDto.CategoryUpdateRequest.builder()
+                .name("수정된 카테고리 이름")
+                .description("수정된 카테고리 설명")
+                .parentCategoryId(1L)
+                .build();
+
+        ReflectionTestUtils.setField(category1, "id", 1L);
+        when(userRepository.findById(seller.getId())).thenReturn(Optional.of(seller));
+        when(categoryRepository.findById(category1.getId())).thenReturn(Optional.of(category1));
+
+        // when & then
+        assertThatThrownBy(() -> categoryService.updateCategory(request, seller.getId(), category1.getId()))
+                .isInstanceOf(CategoryException.class)
+                .hasMessageContaining(CategoryErrorMessages.CANNOT_ASSIGN_MYSELF);
     }
 }

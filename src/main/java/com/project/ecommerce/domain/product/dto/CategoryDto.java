@@ -36,4 +36,16 @@ public class CategoryDto {
 
         private Long parentCategoryId; // null이면 최상위 카테고리
     }
+
+    @Getter
+    @Builder
+    public static class CategoryUpdateRequest {
+
+        @NotBlank(message = "카테고리명은 필수입니다.")
+        private String name;
+
+        private String description;
+
+        private Long parentCategoryId; // null이면 최상위 카테고리
+    }
 }
