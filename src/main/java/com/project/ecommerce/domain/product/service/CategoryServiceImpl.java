@@ -105,4 +105,24 @@ public class CategoryServiceImpl implements CategoryService {
 
         return CategoryDto.CategoryResponse.of(category);
     }
+
+    @Override
+    public void deleteCategory(Long categoryId, Long sellerId) {
+        // 판매자인지 검증
+        User user = userRepository.findById(sellerId)
+                .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
+
+        user.checkSeller();
+
+        // 카테고리 검색
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryException(CategoryErrorMessages.NOT_FOUND_CATEGORY, HttpStatus.NOT_FOUND));
+
+        // 하위 카테고리 검색: 있으면 삭제할 수 없음
+        if (!categoryRepository.findByParentCategory_Id(categoryId).isEmpty()) {
+            throw new CategoryException(CategoryErrorMessages.CANNOT_DELETE_BY_SUB_CATEGORY, HttpStatus.BAD_REQUEST);
+        }
+
+        categoryRepository.delete(category);
+    }
 }

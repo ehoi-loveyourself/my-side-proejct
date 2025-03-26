@@ -258,4 +258,38 @@ class CategoryServiceImplTest {
                 .isInstanceOf(CategoryException.class)
                 .hasMessageContaining(CategoryErrorMessages.CANNOT_ASSIGN_MYSELF);
     }
+
+    @DisplayName("판매자가 카테고리 삭제시 성공한다. 단, 하위 카테고리가 없는 경우에")
+    @Test
+    void 카테고리_삭제_판매자용_성공() {
+        // given
+        Long categoryId = 1L;
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category1));
+        when(userRepository.findById(seller.getId())).thenReturn(Optional.of(seller));
+        when(categoryRepository.findByParentCategory_Id(categoryId)).thenReturn(List.of());
+
+        // when
+        categoryService.deleteCategory(categoryId, seller.getId());
+
+        // then
+        verify(userRepository).findById(anyLong());
+        verify(categoryRepository).findById(anyLong());
+        verify(categoryRepository).findByParentCategory_Id(anyLong());
+        verify(categoryRepository).delete(any());
+    }
+
+    @DisplayName("하위 카테고리가 있다면 삭제가 불가능하다.")
+    @Test
+    void 카테고리_삭제_판매자용_실패_하위카테고리존재() {
+        // given
+        Long categoryId = 1L;
+        when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category1));
+        when(userRepository.findById(seller.getId())).thenReturn(Optional.of(seller));
+        when(categoryRepository.findByParentCategory_Id(categoryId)).thenReturn(List.of(category1, category2));
+
+        // when & then
+        assertThatThrownBy(() -> categoryService.deleteCategory(categoryId, seller.getId()))
+                .isInstanceOf(CategoryException.class)
+                .hasMessageContaining(CategoryErrorMessages.CANNOT_DELETE_BY_SUB_CATEGORY);
+    }
 }
