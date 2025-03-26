@@ -43,4 +43,17 @@ public class Category extends BaseEntity {
         this.parentCategory = parentCategory;
         this.childrenCategories = childrenCategories;
     }
+
+    //==비즈니스 로직==//
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateParentCategory(Category parent) {
+        this.parentCategory = parent;
+    }
 }
