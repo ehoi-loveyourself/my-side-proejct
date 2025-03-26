@@ -13,4 +13,6 @@ public interface CategoryService {
     CategoryDto.CategoryResponse registerCategory(CategoryDto.CategoryRegisterRequest request, Long sellerId);
 
     CategoryDto.CategoryResponse updateCategory(CategoryDto.CategoryUpdateRequest request, Long sellerId, Long categoryId);
+
+    void deleteCategory(Long categoryId, Long sellerId);
 }
