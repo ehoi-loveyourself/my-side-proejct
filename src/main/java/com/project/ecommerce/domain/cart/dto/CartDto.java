@@ -2,12 +2,15 @@ package com.project.ecommerce.domain.cart.dto;
 
 import com.project.ecommerce.common.exception.CartErrorMessages;
 import com.project.ecommerce.common.exception.ProductErrorMessages;
+import com.project.ecommerce.domain.cart.entity.Cart;
+import com.project.ecommerce.domain.cart.entity.CartItem;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CartDto {
@@ -25,6 +28,34 @@ public class CartDto {
 
         // user 자체를 반납하는 거보다는 user id만 반납하는게 좋을까?
 //        private UserDto.UserResponse user;
+
+        public static CartResponse empty() {
+            return CartResponse.builder()
+                    .items(new ArrayList<>())
+                    .totalItems(0)
+                    .totalPrice(BigDecimal.ZERO)
+                    .build();
+        }
+
+        public static CartResponse of(Cart cart) {
+            List<CartItemDto.CartItemResponse> items = new ArrayList<>();
+            BigDecimal totalPrice = BigDecimal.ZERO;
+
+            List<CartItem> cartItems = cart.getCartItems();
+            for (CartItem cartItem : cartItems) {
+                CartItemDto.CartItemResponse cartItemResponse = CartItemDto.CartItemResponse.of(cartItem);
+                items.add(cartItemResponse);
+
+                totalPrice = totalPrice.add(cartItemResponse.getTotalPrice());
+            }
+
+            return CartDto.CartResponse.builder()
+                    .cartId(cart.getId())
+                    .items(items)
+                    .totalItems(items.size())
+                    .totalPrice(totalPrice)
+                    .build();
+        }
     }
 
     @Getter
