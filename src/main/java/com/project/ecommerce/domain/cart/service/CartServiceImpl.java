@@ -35,4 +35,19 @@ public class CartServiceImpl implements CartService {
 
         return CartDto.CartResponse.of(cart);
     }
+
+    @Override
+    public void clearCart(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
+
+        Cart cart = cartRepository.findById(user.getId())
+                .orElse(null);
+
+        if (cart == null || cart.getCartItems().isEmpty()) {
+            return;
+        }
+
+        cart.getCartItems().clear();
+    }
 }
