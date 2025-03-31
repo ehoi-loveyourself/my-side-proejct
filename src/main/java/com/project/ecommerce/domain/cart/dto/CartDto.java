@@ -1,6 +1,7 @@
 package com.project.ecommerce.domain.cart.dto;
 
 import com.project.ecommerce.common.exception.CartErrorMessages;
+import com.project.ecommerce.common.exception.CartItemErrorMessages;
 import com.project.ecommerce.common.exception.ProductErrorMessages;
 import com.project.ecommerce.domain.cart.entity.Cart;
 import com.project.ecommerce.domain.cart.entity.CartItem;
@@ -73,8 +74,8 @@ public class CartDto {
     @Builder
     public static class UpdateItemQuantityRequest {
 
-        @NotNull(message = ProductErrorMessages.REQUIRED_PRODUCT_ID)
-        private Long productId;
+        @NotNull(message = CartItemErrorMessages.REQUIRED_CART_ITEM_ID)
+        private Long cartItemId;
 
         @Min(value = 0, message = CartErrorMessages.QUANTITY_MUST_NOT_BE_ZERO)
         private int quantity;
