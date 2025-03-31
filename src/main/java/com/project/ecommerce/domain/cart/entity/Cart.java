@@ -1,6 +1,7 @@
 package com.project.ecommerce.domain.cart.entity;
 
 import com.project.ecommerce.domain.common.BaseEntity;
+import com.project.ecommerce.domain.product.entity.Product;
 import com.project.ecommerce.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -32,5 +33,16 @@ public class Cart extends BaseEntity {
     @Builder
     public Cart(User user) {
         this.user = user;
+    }
+
+    //==연관관계 편의 메서드==//
+    public void addItems(Product product, int quantity) {
+        CartItem cartItem = CartItem.builder()
+                .cart(this)
+                .product(product)
+                .quantity(quantity)
+                .build();
+
+        this.cartItems.add(cartItem);
     }
 }
