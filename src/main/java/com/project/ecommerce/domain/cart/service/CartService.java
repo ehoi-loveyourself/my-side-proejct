@@ -14,4 +14,6 @@ public interface CartService {
 
     // 장바구니에서 아이템 삭제
     CartDto.CartResponse deleteItemFromCart(Long userId, Long productId);
+
+    void clearCart(Long userId);
 }
