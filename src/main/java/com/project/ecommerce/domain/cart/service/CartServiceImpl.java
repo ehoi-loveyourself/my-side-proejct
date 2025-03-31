@@ -1,10 +1,14 @@
 package com.project.ecommerce.domain.cart.service;
 
+import com.project.ecommerce.common.exception.ProductErrorMessages;
+import com.project.ecommerce.common.exception.ProductException;
 import com.project.ecommerce.common.exception.UserErrorMessages;
 import com.project.ecommerce.common.exception.UserException;
 import com.project.ecommerce.domain.cart.dto.CartDto;
 import com.project.ecommerce.domain.cart.entity.Cart;
 import com.project.ecommerce.domain.cart.repository.CartRepository;
+import com.project.ecommerce.domain.product.entity.Product;
+import com.project.ecommerce.domain.product.repository.ProductRepository;
 import com.project.ecommerce.domain.user.entity.User;
 import com.project.ecommerce.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +23,7 @@ public class CartServiceImpl implements CartService {
 
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
+    private final ProductRepository productRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -34,6 +39,28 @@ public class CartServiceImpl implements CartService {
         }
 
         return CartDto.CartResponse.of(cart);
+    }
+
+    @Override
+    public CartDto.CartResponse addItemToCart(Long userId, CartDto.AddItemRequest request) {
+        // 유저를 찾고
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
+
+        // 카트를 찾는다. 카트가 없으면 카트를 생성해야 한다.
+        Cart cart = cartRepository.findById(user.getId())
+                .orElse(Cart.builder()
+                        .user(user)
+                        .build());
+
+        // 카트에 cartItems에 add 한다.
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
+
+        cart.addItems(product, request.getQuantity());
+
+        // [질문] 그런데 이미 들어있는 아이템이 있는데 + 추가로 담았을 경우, 따로 보여줄 것인지, 같이 보여줄 것인지
+        return null;
     }
 
     @Override
