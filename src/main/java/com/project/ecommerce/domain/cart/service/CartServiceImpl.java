@@ -59,8 +59,7 @@ public class CartServiceImpl implements CartService {
 
         cart.addItems(product, request.getQuantity());
 
-        // [질문] 그런데 이미 들어있는 아이템이 있는데 + 추가로 담았을 경우, 따로 보여줄 것인지, 같이 보여줄 것인지
-        return null;
+        return CartDto.CartResponse.of(cart);
     }
 
     @Override
