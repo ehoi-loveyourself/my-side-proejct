@@ -67,5 +67,7 @@ public class CartController {
     ) {
         Long userId = ((User) userDetails).getId();
         cartService.clearCart(userId);
+
+        return ResponseEntity.ok(createSuccessResponse(null));
     }
 }
