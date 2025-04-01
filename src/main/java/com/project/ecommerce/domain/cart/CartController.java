@@ -42,7 +42,7 @@ public class CartController {
     @PatchMapping("/items")
     public ResponseEntity<Map<String, Object>> updateItemQuantity(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable CartDto.UpdateItemQuantityRequest request
+            @RequestBody CartDto.UpdateItemQuantityRequest request
     ) {
         Long userId = ((User) userDetails).getId();
         CartDto.CartResponse response = cartService.updateItemQuantity(userId, request);
