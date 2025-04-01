@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -43,6 +44,14 @@ public class Cart extends BaseEntity {
                 .quantity(quantity)
                 .build();
 
-        this.cartItems.add(cartItem);
+        // 같은 아이템이 있다면 수량만 증가시키는 게 좋을 것 같음
+        Optional<CartItem> existingItem = this.cartItems.stream()
+                .filter(item -> item.getProduct().equals(product))
+                .findFirst();
+
+        existingItem.ifPresentOrElse(
+                item -> item.increaseQuantity(quantity),
+                () -> this.cartItems.add(cartItem)
+        );
     }
 }
