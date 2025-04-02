@@ -63,6 +63,11 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public CartDto.CartResponse updateItemQuantity(Long userId, CartDto.UpdateItemQuantityRequest request) {
+        return null;
+    }
+
+    @Override
     public void clearCart(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
