@@ -38,20 +38,20 @@ public class Cart extends BaseEntity {
 
     //==연관관계 편의 메서드==//
     public void addItems(Product product, int quantity) {
-        CartItem cartItem = CartItem.builder()
-                .cart(this)
-                .product(product)
-                .quantity(quantity)
-                .build();
-
         // 같은 아이템이 있다면 수량만 증가시키는 게 좋을 것 같음
-        Optional<CartItem> existingItem = this.cartItems.stream()
+        CartItem existingItem = this.cartItems.stream()
                 .filter(item -> item.getProduct().equals(product))
-                .findFirst();
+                .findFirst()
+                        .orElse(null);
 
-        existingItem.ifPresentOrElse(
-                item -> item.increaseQuantity(quantity),
-                () -> this.cartItems.add(cartItem)
-        );
+        if (existingItem != null) {
+            existingItem.increaseQuantity(quantity);
+        } else {
+            this.cartItems.add(CartItem.builder()
+                    .cart(this)
+                    .product(product)
+                    .quantity(quantity)
+                    .build());
+        }
     }
 }
