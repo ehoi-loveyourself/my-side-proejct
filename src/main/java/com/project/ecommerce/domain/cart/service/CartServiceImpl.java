@@ -31,7 +31,7 @@ public class CartServiceImpl implements CartService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
 
-        Cart cart = cartRepository.findById(user.getId())
+        Cart cart = cartRepository.findByUser(user)
                 .orElse(null); // 장바구니가 없다고 에러를 날릴 필요가 없음, 그냥 빈 바구니를 리턴하면 됨
 
         if (cart == null || cart.getCartItems().isEmpty()) {
@@ -48,8 +48,8 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
 
         // 카트를 찾는다. 카트가 없으면 카트를 생성해야 한다.
-        Cart cart = cartRepository.findById(user.getId())
-                .orElse(Cart.builder()
+        Cart cart = cartRepository.findByUser(user)
+                .orElseGet(() -> cartRepository.save(Cart.builder()
                         .user(user)
                         .build());
 
