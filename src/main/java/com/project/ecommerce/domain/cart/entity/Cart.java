@@ -62,7 +62,7 @@ public class Cart extends BaseEntity {
         CartItem existingItem = this.getCartItems().stream()
                 .filter(item -> item.getId().equals(cartItemId))
                 .findFirst()
-                        .orElseThrow(() -> new CartException(CartItemErrorMessages.NO_ITEM_FOR_UPDATE, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CartException(CartItemErrorMessages.NO_ITEM_FOR_UPDATE, HttpStatus.NOT_FOUND));
 
         existingItem.updateQuantity(quantity);
     }

@@ -67,7 +67,7 @@ public class CartServiceImpl implements CartService {
 
         // 카트를 찾아서
         Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new CartException(CartItemErrorMessages.NO_ITEM_FOR_UPDATE, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new CartException(CartItemErrorMessages.EMPTY_CART, HttpStatus.BAD_REQUEST));
 
         cart.updateQuantity(request.getCartItemId(), request.getQuantity());
 
