@@ -53,10 +53,10 @@ public class CartController {
     @DeleteMapping
     public ResponseEntity<Map<String, Object>> deleteItemFromCart(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam Long productId
+            @RequestParam Long cartItemId
     ) {
         Long userId = ((User) userDetails).getId();
-        CartDto.CartResponse response = cartService.deleteItemFromCart(userId, productId);
+        CartDto.CartResponse response = cartService.deleteItemFromCart(userId, cartItemId);
 
         return ResponseEntity.ok(createSuccessResponse(response));
     }
