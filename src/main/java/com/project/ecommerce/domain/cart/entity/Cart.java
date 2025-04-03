@@ -1,5 +1,7 @@
 package com.project.ecommerce.domain.cart.entity;
 
+import com.project.ecommerce.common.exception.CartException;
+import com.project.ecommerce.common.exception.CartItemErrorMessages;
 import com.project.ecommerce.domain.common.BaseEntity;
 import com.project.ecommerce.domain.product.entity.Product;
 import com.project.ecommerce.domain.user.entity.User;
@@ -8,10 +10,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
