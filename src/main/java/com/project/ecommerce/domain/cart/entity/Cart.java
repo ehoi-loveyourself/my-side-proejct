@@ -66,4 +66,14 @@ public class Cart extends BaseEntity {
 
         existingItem.updateQuantity(quantity);
     }
+
+    public void deleteItems(Long cartItemId) {
+        CartItem cartItem = this.cartItems.stream()
+                .filter(item -> item.getId().equals(cartItemId))
+                .findFirst()
+                .orElseThrow(() -> new CartException(CartItemErrorMessages.NO_ITEM_FOR_DELETE, HttpStatus.NOT_FOUND));
+
+        cartItem.removeFromCart(); // cartItem과 cart와의 연관관계를 끊으면 cartItem이 DB에서도 삭제됨
+        this.cartItems.remove(cartItem);
+    }
 }
