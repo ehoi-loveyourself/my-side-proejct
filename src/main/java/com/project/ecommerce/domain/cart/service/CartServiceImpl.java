@@ -64,7 +64,17 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartDto.CartResponse updateItemQuantity(Long userId, CartDto.UpdateItemQuantityRequest request) {
-        return null;
+        // 유저를 찾고
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
+
+        // 카트를 찾아서
+        Cart cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new CartException(CartItemErrorMessages.NO_ITEM_FOR_UPDATE, HttpStatus.NOT_FOUND));
+
+        cart.updateQuantity(request.getCartItemId(), request.getQuantity());
+
+        return CartDto.CartResponse.of(cart);
     }
 
     @Override

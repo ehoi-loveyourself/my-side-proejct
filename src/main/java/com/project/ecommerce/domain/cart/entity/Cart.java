@@ -54,4 +54,14 @@ public class Cart extends BaseEntity {
                     .build());
         }
     }
+
+    public void updateQuantity(Long cartItemId, int quantity) {
+        // 수량을 변경할 장바구니 아이템을 찾는다. 없으면 에러, 있으면 수량만 변경
+        CartItem existingItem = this.getCartItems().stream()
+                .filter(item -> item.getId().equals(cartItemId))
+                .findFirst()
+                        .orElseThrow(() -> new CartException(CartItemErrorMessages.NO_ITEM_FOR_UPDATE, HttpStatus.NOT_FOUND));
+
+        existingItem.updateQuantity(quantity);
+    }
 }
