@@ -85,8 +85,10 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
 
         // 카트를 찾아서
-        Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new CartException(CartItemErrorMessages.EMPTY_CART, HttpStatus.BAD_REQUEST));
+        Cart cart = cartRepository.findByUser(user).orElse(null);
+        if (cart == null) {
+            return CartDto.CartResponse.empty();
+        }
 
         cart.deleteItems(cartItemId);
 
