@@ -3,6 +3,7 @@ package com.project.ecommerce.domain.cart.service;
 import com.project.ecommerce.common.exception.*;
 import com.project.ecommerce.domain.cart.dto.CartDto;
 import com.project.ecommerce.domain.cart.entity.Cart;
+import com.project.ecommerce.domain.cart.entity.CartItem;
 import com.project.ecommerce.domain.cart.repository.CartRepository;
 import com.project.ecommerce.domain.product.entity.Product;
 import com.project.ecommerce.domain.product.repository.ProductRepository;
@@ -107,6 +108,7 @@ public class CartServiceImpl implements CartService {
             return;
         }
 
-        cart.getCartItems().clear();
+        cart.getCartItems().forEach(CartItem::removeFromCart);// 각각 아이템에서도 장바구니 연관관계 지우기
+        cart.getCartItems().clear(); // 장바구니에서도 아이템 리스트 다 지우고 -> 연관관계 확실히 양쪽 다 끊어주기
     }
 }
