@@ -29,7 +29,11 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new UserException(UserErrorMessages.NOT_FOUND_USER, HttpStatus.NOT_FOUND));
 
         Cart cart = cartRepository.findByUser(user)
-                .orElse(null); // 장바구니가 없다고 에러를 날릴 필요가 없음, 그냥 빈 바구니를 리턴하면 됨
+//                .orElse(null); // as-is 그냥 null을 리턴
+                .orElseGet(() -> Cart.builder()
+                        .user(user)
+                        .build()); // to-be 빈 장바구니를 만들어서 리턴
+        // 장바구니가 없다고 에러를 날릴 필요가 없음, 그냥 빈 바구니를 리턴하면 됨
 
         if (cart == null || cart.getCartItems().isEmpty()) {
             return CartDto.CartResponse.empty();
