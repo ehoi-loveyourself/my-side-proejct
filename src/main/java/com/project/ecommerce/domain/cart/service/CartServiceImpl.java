@@ -51,9 +51,13 @@ public class CartServiceImpl implements CartService {
 
         // 카트를 찾는다. 카트가 없으면 카트를 생성해야 한다.
         Cart cart = cartRepository.findByUser(user)
-                .orElseGet(() -> cartRepository.save(Cart.builder()
-                        .user(user)
-                        .build()));
+                .orElseGet(() -> {
+                    Cart newCart = Cart.builder()
+                                    .user(user)
+                                            .build();
+
+                    return cartRepository.save(newCart);
+                });
 
         // 카트에 cartItems에 add 한다.
         Product product = productRepository.findById(request.getProductId())
