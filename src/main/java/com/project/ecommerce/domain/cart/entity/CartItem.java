@@ -2,9 +2,9 @@ package com.project.ecommerce.domain.cart.entity;
 
 import com.project.ecommerce.domain.common.BaseEntity;
 import com.project.ecommerce.domain.product.entity.Product;
-import com.project.ecommerce.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,4 +28,23 @@ public class CartItem extends BaseEntity {
     private Product product;
 
     private int quantity;
+
+    @Builder
+    public CartItem(Cart cart, Product product, int quantity) {
+        this.cart = cart;
+        this.product = product;
+        this.quantity = quantity;
+    }
+
+    public void increaseQuantity(int quantity) {
+        this.quantity += quantity;
+    }
+
+    public void updateQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void removeFromCart() {
+        this.cart = null;
+    }
 }
