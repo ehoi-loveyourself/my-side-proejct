@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public class CustomUserDetails implements UserDetails {
 
-    private final Collection<? extends GrantedAuthority> authorities;
+    private final List<GrantedAuthority> authorities;
     private final String password;
     private final String name;
     @Getter
