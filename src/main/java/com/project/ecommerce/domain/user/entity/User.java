@@ -17,10 +17,10 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "users")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends BaseEntity implements UserDetails {
+public class User extends BaseEntity { // implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,36 +65,5 @@ public class User extends BaseEntity implements UserDetails {
         if (!isSeller()) {
             throw new UserException(UserErrorMessages.ONLY_FOR_SELLER, HttpStatus.UNAUTHORIZED);
         }
-    }
-
-    //==UserDetails 구현 ==//
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
-    }
-
-    @Override
-    public String getUsername() {
-        return this.email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
     }
 }
