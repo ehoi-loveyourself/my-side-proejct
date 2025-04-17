@@ -1,6 +1,7 @@
 package com.project.ecommerce.common.security;
 
 import com.project.ecommerce.domain.user.entity.User;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,13 +19,16 @@ public class CustomUserDetails implements UserDetails {
     private final Collection<? extends GrantedAuthority> authorities;
     private final String password;
     private final String name;
+    @Getter
+    private final Long userId;
 
-    public CustomUserDetails(List<String> roles, String password, String name) {
+    public CustomUserDetails(List<String> roles, String password, String name, Long userId) {
         this.authorities = roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
         this.password = password;
         this.name = name;
+        this.userId = userId;
     }
 
     @Override
@@ -46,6 +50,6 @@ public class CustomUserDetails implements UserDetails {
     public static CustomUserDetails fromUserEntity(User user) {
         List<String> roles = Collections.singletonList(user.getRole().name());
 
-        return new CustomUserDetails(roles, user.getPassword(), user.getName());
+        return new CustomUserDetails(roles, user.getPassword(), user.getName(), user.getId());
     }
 }
