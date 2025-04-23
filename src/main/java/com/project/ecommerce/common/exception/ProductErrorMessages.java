@@ -8,4 +8,5 @@ public class ProductErrorMessages {
     public static final String STOCK_MUST_MORE_THAN_ZERO = "재고 수량은 0 이상이어야 합니다.";
     public static final String CANNOT_UPDATE_PRODUCT_WITH_SAME_STOCK = "기존 재고 수량과 같습니다.";
     public static final String REQUIRED_PRODUCT_ID = "상품을 선택하세요";
+    public static final String INSUFFICIENT_STOCK = "해당 상품의 재고 수량이 부족합니다. 상품 이름: %s, 주문 수량: %d, 현재 재고: %d";
 }
