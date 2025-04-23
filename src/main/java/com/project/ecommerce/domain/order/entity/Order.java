@@ -5,6 +5,7 @@ import com.project.ecommerce.domain.user.entity.Address;
 import com.project.ecommerce.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -49,4 +50,17 @@ public class Order extends BaseEntity {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
+
+    @Builder
+    public Order(String orderNumber, BigDecimal totalAmount, String deliveryMessage,
+                 User user, Address deliveryAddress, Payment payment, List<OrderItem> orderItems) {
+        this.orderNumber = orderNumber;
+        this.orderItems = orderItems;
+        this.totalAmount = totalAmount;
+        this.deliveryAddress = deliveryAddress;
+        this.deliveryMessage = deliveryMessage;
+        this.status = OrderStatus.PENDING_PAYMENT;
+        this.user = user;
+        this.payment = payment;
+    }
 }
