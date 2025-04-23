@@ -13,6 +13,8 @@ public class OrderRequest {
         private List<OrderItemDto> orderItems;
         // 배송 옵션
         private DeliveryOption deliveryOption;
+        // 배송 메시지
+        private String deliveryMessage;
 
         @Getter
         public static class OrderItemDto {
@@ -44,8 +46,6 @@ public class OrderRequest {
             private String recipientName;
             // 수령인 연락처
             private String recipientPhone;
-            // 배송 메시지
-            private String deliveryMessage;
             // 주소록 저장 여부
             private boolean saveToAddressBook;
         }
