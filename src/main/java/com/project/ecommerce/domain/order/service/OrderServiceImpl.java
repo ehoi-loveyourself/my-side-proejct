@@ -61,13 +61,14 @@ public class OrderServiceImpl implements OrderService {
                // 주문 번호 생성하기
                String orderNumber = generateOrderNumber();
 
+               // 총 주문 금액
                BigDecimal totalAmount = orderItemInfos.stream()
-                       .map(itemInfo -> )
+                       .map(itemInfo -> itemInfo.product.getPrice().multiply(BigDecimal.valueOf(itemInfo.quantity)))
+                       .reduce(BigDecimal.ZERO, BigDecimal::add);
 
                Order order = Order.builder()
                        .orderNumber(orderNumber)
-//                       .orderItems()
-                       .totalAmount()
+                       .totalAmount(totalAmount)
                        .deliveryAddress(shippingAddress)
                        .deliveryMessage(request.getDeliveryMessage())
                        .user(user)
