@@ -1,12 +1,14 @@
 package com.project.ecommerce.domain.product.entity;
 
+import com.project.ecommerce.common.exception.ProductErrorMessages;
+import com.project.ecommerce.common.exception.ProductException;
 import com.project.ecommerce.domain.common.BaseEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -91,5 +93,15 @@ public class Product extends BaseEntity {
     public Product updateStock(int stock) {
         this.stock = stock;
         return this;
+    }
+
+    public void decreaseQuantity(int quantity) {
+        if (this.stock < quantity) {
+            throw new ProductException(String.format(ProductErrorMessages.INSUFFICIENT_STOCK,
+                    this.name,
+                    quantity,
+                    this.stock)
+                    , HttpStatus.BAD_REQUEST);
+        }
     }
 }

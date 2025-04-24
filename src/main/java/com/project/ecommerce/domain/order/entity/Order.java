@@ -4,10 +4,7 @@ import com.project.ecommerce.domain.common.BaseEntity;
 import com.project.ecommerce.domain.user.entity.Address;
 import com.project.ecommerce.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -48,14 +45,14 @@ public class Order extends BaseEntity {
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
 
+    @Setter
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @Builder
     public Order(String orderNumber, BigDecimal totalAmount, String deliveryMessage,
-                 User user, Address deliveryAddress, Payment payment, List<OrderItem> orderItems) {
+                 User user, Address deliveryAddress, Payment payment) {
         this.orderNumber = orderNumber;
-        this.orderItems = orderItems;
         this.totalAmount = totalAmount;
         this.deliveryAddress = deliveryAddress;
         this.deliveryMessage = deliveryMessage;
