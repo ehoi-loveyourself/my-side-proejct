@@ -105,6 +105,29 @@ public class OrderServiceImpl implements OrderService {
         return null;
     }
 
+    /**
+     * [여기서 product가 아니라 productId를 파라미터로 넘기는 이유가 궁금해서 찾아봄]
+     * 낙관적 락 매커니즘과 관련이 있음!
+     * 낙관적 락 예외가 발생했다는 것은, 이미 해당 엔티티의 버전 정보가 다른 트랜잭션에 의해 변경되었다는 !
+     * 1. 그래서 최신 버전의 엔티티를 조회할 필요가 있음: 기존 엔티티 객체를 그대로 사용하면 또 다시 락에 걸릴 수가 있음
+     * 2. @Retryable 어노테이션은, 트랜잭션을 분리해서 새로운 트랜잭션에서 메서드를 실행함. 이때 엔티티 자체는 트랜잭션 간에
+     *      직렬화/역직렬화되지 않고, ID만 전달하는 것이 안전함
+     * 3. 영속성 컨텍스트 고려: 하나의 트랜잭션이 실패하고 새로운 트랜잭션이 시작될 때, 영속성 컨텍스트는 초기화되므로
+     * 처음부터 다시 ID로 조회하는 것이 영속성 문제를 방지한다.
+     * @param productId
+     * @param quantity
+     */
+    // todo retryable annotation
+    private void retryDecreaseStock(Long productId, int quantity) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductException(ProductErrorMessages.NOT_FOUND_PRODUCT, HttpStatus.NOT_FOUND));
+
+        product.decreaseQuantity(quantity);
+        productRepository.save(product);
+        log.debug("상품 재고 감소 재시도 성공: productId={}, 감소량={}, 남은 재고={}",
+                product.getId(), quantity, product.getStock());
+    }
+
     private List<OrderItem> createOrderItems(List<OrderItemInfo> orderItemInfos, Order order) {
         return orderItemInfos.stream()
                 .map(info -> OrderItem.builder()
