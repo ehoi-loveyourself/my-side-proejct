@@ -3,8 +3,10 @@ package com.project.ecommerce.domain.order.service;
 import com.project.ecommerce.common.exception.*;
 import com.project.ecommerce.common.security.UserContext;
 import com.project.ecommerce.domain.order.dto.OrderRequest;
+import com.project.ecommerce.domain.order.dto.OrderResponse;
 import com.project.ecommerce.domain.order.entity.Order;
 import com.project.ecommerce.domain.order.entity.OrderItem;
+import com.project.ecommerce.domain.order.repository.OrderRepository;
 import com.project.ecommerce.domain.product.entity.Product;
 import com.project.ecommerce.domain.product.repository.ProductRepository;
 import com.project.ecommerce.domain.user.entity.Address;
@@ -39,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserContext userContext;
     private final AddressRepository addressRepository;
     private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
 
     @Override
     @Transactional
@@ -83,26 +86,34 @@ public class OrderServiceImpl implements OrderService {
                order.setOrderItems(orderItems);
 
                // 재고 감소 로직
-               orderItemInfos.forEach(info -> {
-                            try {
-                                info.getProduct().decreaseQuantity(info.getQuantity());
-                                productRepository.save(info.getProduct());
+               decreaseProductStock(orderItemInfos);
 
-                                log.debug("상품 재고 감소: 상품 id={}, 감소량={}, 남은 재고={}",
-                                        info.getProduct().getId(), info.getQuantity(), info.getProduct().getStock());
-                            } catch (OptimisticLockingFailureException e) {
-                                log.warn("재고 감소 중 낙관적 락 충돌 발생 -> 재시도, product id={}", info.getProduct().getId());
-                                retryDecreaseStock(info.getProduct().getId(), info.getQuantity());
-                            }
-                       });
+               // 주문 저장
+               Order savedOrder = orderRepository.save(order);
+               log.info("주문 생성 완료, 주문 정보={}", savedOrder.toString());
 
-           } catch ()
+               return OrderResponse.CreateResponse.from(order);
+           } catch (Exception e) {
+               status.setRollbackOnly();
+               log.error("주문 생성중 오류 발생", e);
+               throw e;
+           }
         });
-        // 1. 존재하는 사용자인지 확인
-        // 2. 주문 엔티티 생성
-        // 3. 주문 아이템 생성 및 설정
-        // 4. 주문 저장
-        return null;
+    }
+
+    private void decreaseProductStock(List<OrderItemInfo> orderItemInfos) {
+        orderItemInfos.forEach(info -> {
+            try {
+                info.getProduct().decreaseQuantity(info.getQuantity());
+                productRepository.save(info.getProduct());
+
+                log.debug("상품 재고 감소: 상품 id={}, 감소량={}, 남은 재고={}",
+                        info.getProduct().getId(), info.getQuantity(), info.getProduct().getStock());
+            } catch (OptimisticLockingFailureException e) {
+                log.warn("재고 감소 중 낙관적 락 충돌 발생 -> 재시도, product id={}", info.getProduct().getId());
+                retryDecreaseStock(info.getProduct().getId(), info.getQuantity());
+            }
+        });
     }
 
     /**

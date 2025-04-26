@@ -8,4 +8,5 @@ public class UserErrorMessages {
     public static final String MIN_PASSWORD_LENGTH_ERROR = "비밀번호는 최소 8자 이상이어야 합니다.";
     public static final String WRONG_LOGIN_INFO = "아이디와 비밀번호를 확인하세요";
     public static final String ONLY_FOR_SELLER = "판매자만 이용가능한 기능입니다.";
+    public static final String LOGIN_REQUIRED = "로그인이 필요합니다.";
 }
